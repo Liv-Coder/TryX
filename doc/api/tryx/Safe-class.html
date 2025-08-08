@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the Safe class from the tryx library, for the Dart programming language.">
+  <title>Safe class - tryx library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">tryx</a></li>
+    <li><a href="../tryx/">tryx.dart</a></li>
+    <li class="self-crumb">Safe class</li>
+  </ol>
+  <div class="self-name">Safe</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="tryx&#47;tryx-library-sidebar.html"
+    data-below-sidebar="tryx&#47;Safe-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">Safe</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Advanced configuration class for safe execution with retry, timeout, and logging.</p>
+<p>The <a href="../tryx/Safe-class.html">Safe</a> class provides a configurable way to execute operations with
+advanced error handling features including retry policies, timeouts,
+custom error mapping, and logging integration.</p>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">final safeExecutor = Safe(
+  timeout: Duration(seconds: 5),
+  retryPolicy: RetryPolicy.exponentialBackoff(
+    maxAttempts: 3,
+    initialDelay: Duration(milliseconds: 100),
+  ),
+  logger: (error, attempt) =&gt; print('Attempt $attempt failed: $error'),
+);
+
+final result = await safeExecutor.call(() =&gt; unreliableApiCall());
+</code></pre>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="Safe.new" class="callable">
+          <span class="name"><a href="../tryx/Safe/Safe.html">Safe.new</a></span><span class="signature">({<span class="parameter" id="-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a></span> <span class="parameter-name">retryPolicy</span> = <span class="default-value">RetryPolicies.none</span>, </span><span class="parameter" id="-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})</span>
+        </dt>
+        <dd>
+          Creates a Safe instance with the specified configuration.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+        <dt id="Safe.critical" class="callable">
+          <span class="name"><a href="../tryx/Safe/Safe.critical.html">Safe.critical</a></span><span class="signature">({<span class="parameter" id="critical-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="critical-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a>?</span> <span class="parameter-name">retryPolicy</span>, </span><span class="parameter" id="critical-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="critical-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="critical-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})</span>
+        </dt>
+        <dd>
+          Creates a Safe instance for critical operations that need aggressive retry.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+        <dt id="Safe.database" class="callable">
+          <span class="name"><a href="../tryx/Safe/Safe.database.html">Safe.database</a></span><span class="signature">({<span class="parameter" id="database-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="database-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a>?</span> <span class="parameter-name">retryPolicy</span>, </span><span class="parameter" id="database-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="database-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="database-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})</span>
+        </dt>
+        <dd>
+          Creates a Safe instance optimized for database operations.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+        <dt id="Safe.network" class="callable">
+          <span class="name"><a href="../tryx/Safe/Safe.network.html">Safe.network</a></span><span class="signature">({<span class="parameter" id="network-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="network-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a>?</span> <span class="parameter-name">retryPolicy</span>, </span><span class="parameter" id="network-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="network-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="network-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})</span>
+        </dt>
+        <dd>
+          Creates a Safe instance optimized for network operations.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="errorMapper" class="property">
+  <span class="name"><a href="../tryx/Safe/errorMapper.html">errorMapper</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a> Function<span class="signature">(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)</span>?</span>
+  
+
+</dt>
+<dd>
+  Optional function to map caught errors to different types.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property">
+  <span class="name"><a href="../tryx/Safe/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="logger" class="property">
+  <span class="name"><a href="../tryx/Safe/logger.html">logger</a></span>
+  <span class="signature">&#8594; void Function<span class="signature">(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)</span>?</span>
+  
+
+</dt>
+<dd>
+  Optional logger function called when errors occur.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="onRetry" class="property">
+  <span class="name"><a href="../tryx/Safe/onRetry.html">onRetry</a></span>
+  <span class="signature">&#8594; void Function<span class="signature">(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)</span>?</span>
+  
+
+</dt>
+<dd>
+  Optional callback called before each retry attempt.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="retryPolicy" class="property">
+  <span class="name"><a href="../tryx/Safe/retryPolicy.html">retryPolicy</a></span>
+  <span class="signature">&#8594; <a href="../tryx/RetryPolicy-class.html">RetryPolicy</a></span>
+  
+
+</dt>
+<dd>
+  The retry policy to use for failed operations.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="timeout" class="property">
+  <span class="name"><a href="../tryx/Safe/timeout.html">timeout</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span>
+  
+
+</dt>
+<dd>
+  The timeout for the operation.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="call" class="callable">
+  <span class="name"><a href="../tryx/Safe/call.html">call</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="call-param-fn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">fn</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Executes the given function with the configured safety features.
+  
+
+</dd>
+
+        <dt id="copyWith" class="callable">
+  <span class="name"><a href="../tryx/Safe/copyWith.html">copyWith</a></span><span class="signature">(<wbr>{<span class="parameter" id="copyWith-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="copyWith-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a>?</span> <span class="parameter-name">retryPolicy</span>, </span><span class="parameter" id="copyWith-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="copyWith-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="copyWith-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})
+    <span class="returntype parameter">&#8594; <a href="../tryx/Safe-class.html">Safe</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Creates a new Safe instance with modified configuration.
+  
+
+</dd>
+
+        <dt id="execute" class="callable">
+  <span class="name"><a href="../tryx/Safe/execute.html">execute</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="execute-param-fn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">fn</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/SafeResult.html">SafeResult</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Convenience method for executing functions that return <a href="../tryx/SafeResult.html">SafeResult</a>.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable">
+  <span class="name"><a href="../tryx/Safe/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  A string representation of this object.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable">
+  <span class="name"><a href="../tryx/Safe/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  The equality operator.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+  <section class="summary offset-anchor" id="static-methods">
+    <h2>Static Methods</h2>
+    <dl class="callables">
+        <dt id="executeWith" class="callable">
+  <span class="name"><a href="../tryx/Safe/executeWith.html">executeWith</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="executeWith-param-fn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">fn</span>(), {</span><span class="parameter" id="executeWith-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">timeout</span>, </span><span class="parameter" id="executeWith-param-retryPolicy"><span class="type-annotation"><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a>?</span> <span class="parameter-name">retryPolicy</span>, </span><span class="parameter" id="executeWith-param-errorMapper"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?, </span><span class="parameter" id="executeWith-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span></span>)?, </span><span class="parameter" id="executeWith-param-onRetry"><span class="type-annotation">void</span> <span class="parameter-name">onRetry</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?</span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Static convenience method for one-off safe execution.
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">tryx</a></li>
+    <li><a href="../tryx/">tryx</a></li>
+    <li class="self-crumb">Safe class</li>
+</ol>
+
+    <h5>tryx library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    tryx
+      0.1.0
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="tryx library API docs, for the Dart programming language.">
+  <title>tryx library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">tryx</a></li>
+    <li class="self-crumb">tryx.dart</li>
+  </ol>
+  <div class="self-name">tryx</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar=""
+    data-below-sidebar="tryx&#47;tryx-library-sidebar.html">
+  
+    <div>
+      
+
+      <h1>
+        <span class="kind-library">tryx</span>
+        library 
+ 
+
+      </h1>
+    </div>
+
+    
+<section class="desc markdown">
+  <p>A minimalistic and expressive Dart library for handling errors without traditional try-catch blocks.</p>
+<p>Tryx provides a clean, functional, and beginner-friendly alternative using a declarative API
+similar to Result, Either, or safeCall patterns from Kotlin, Swift, or Rust.</p>
+<h2 id="quick-start">Quick Start</h2>
+<pre class="language-dart"><code class="language-dart">import 'package:tryx/tryx.dart';
+
+// Synchronous operations
+final result = safe(() =&gt; int.parse('42'));
+result.when(
+  success: (value) =&gt; print('Parsed: $value'),
+  failure: (error) =&gt; print('Error: $error'),
+);
+
+// Asynchronous operations
+final asyncResult = await safeAsync(() =&gt; fetchUserData());
+asyncResult
+  .map((user) =&gt; user.name)
+  .onSuccess((name) =&gt; print('Welcome, $name!'))
+  .onFailure((error) =&gt; logError(error));
+</code></pre>
+<h2 id="core-concepts">Core Concepts</h2>
+<h3 id="resultt-e">Result&lt;T, E&gt;</h3>
+<p>The foundation of Tryx is the <a href="../tryx/Result-class.html">Result</a> type that encapsulates success and failure states:</p>
+<ul>
+<li><a href="../tryx/Success-class.html">Success</a>: Contains a value of type T</li>
+<li><a href="../tryx/Failure-class.html">Failure</a>: Contains an error of type E</li>
+<li><a href="../tryx/SafeResult.html">SafeResult</a>: Type alias for Result&lt;T, Exception&gt;</li>
+</ul>
+<h3 id="safe-functions">Safe Functions</h3>
+<ul>
+<li><a href="../tryx/safe.html">safe</a>: Wraps synchronous operations</li>
+<li><a href="../tryx/safeAsync.html">safeAsync</a>: Wraps asynchronous operations</li>
+<li><a href="../tryx/safeWith.html">safeWith</a>: Wraps operations with custom error mapping</li>
+</ul>
+<h3 id="method-chaining">Method Chaining</h3>
+<p>Results support functional programming patterns:</p>
+<ul>
+<li><a href="../tryx/ResultExtensions/map.html">ResultExtensions.map</a>: Transform success values</li>
+<li><a href="../tryx/ResultExtensions/flatMap.html">ResultExtensions.flatMap</a>: Chain operations that can fail</li>
+<li><a href="../tryx/ResultExtensions/when.html">ResultExtensions.when</a>: Pattern matching</li>
+<li><a href="../tryx/ResultExtensions/fold.html">ResultExtensions.fold</a>: Reduce to a single value</li>
+<li><a href="../tryx/ResultExtensions/recover.html">ResultExtensions.recover</a>: Handle failures with fallback values</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre class="language-dart"><code class="language-dart">// Parse a number safely
+final result = safe(() =&gt; int.parse(userInput));
+final message = result.when(
+  success: (number) =&gt; 'You entered: $number',
+  failure: (error) =&gt; 'Invalid input: $error',
+);
+</code></pre>
+<h3 id="method-chaining-2">Method Chaining</h3>
+<pre class="language-dart"><code class="language-dart">final result = await safeAsync(() =&gt; fetchUser())
+  .then((result) =&gt; result
+    .map((user) =&gt; user.email)
+    .flatMap((email) =&gt; safe(() =&gt; validateEmail(email)))
+    .map((email) =&gt; email.toLowerCase())
+  );
+</code></pre>
+<h3 id="custom-error-types">Custom Error Types</h3>
+<pre class="language-dart"><code class="language-dart">sealed class ApiError extends Exception {
+  const ApiError();
+  factory ApiError.network() = NetworkError;
+  factory ApiError.auth() = AuthError;
+}
+
+final result = await safeWith&lt;User, ApiError&gt;(
+  () =&gt; apiClient.getUser(),
+  errorMapper: (e) =&gt; e is SocketException
+      ? ApiError.network()
+      : ApiError.auth(),
+);
+</code></pre>
+<p>See also:</p>
+<ul>
+<li><a href="../tryx/Result-class.html">Result</a> for the core type documentation</li>
+<li><a href="../tryx/safe.html">safe</a> for synchronous operation wrapping</li>
+<li><a href="../tryx/safeAsync.html">safeAsync</a> for asynchronous operation wrapping</li>
+<li><a href="../tryx/ResultExtensions.html">ResultExtensions</a> for method chaining operations</li>
+</ul>
+</section>
+
+
+    <section class="summary offset-anchor" id="classes">
+      <h2>Classes</h2>
+      <dl>
+          <dt id="Failure">
+  <span class="name "><a href="../tryx/Failure-class.html">Failure</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Failure state implementation of <a href="../tryx/Result-class.html">Result</a>.
+</dd>
+
+          <dt id="Result">
+  <span class="name "><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Core Result type that encapsulates success/failure outcomes.
+</dd>
+
+          <dt id="RetryPolicies">
+  <span class="name "><a href="../tryx/RetryPolicies-class.html">RetryPolicies</a></span> 
+
+</dt>
+<dd>
+  Predefined retry policies for common use cases.
+</dd>
+
+          <dt id="RetryPolicy">
+  <span class="name "><a href="../tryx/RetryPolicy-class.html">RetryPolicy</a></span> 
+
+</dt>
+<dd>
+  Configuration for retry behavior in safe operations.
+</dd>
+
+          <dt id="Safe">
+  <span class="name "><a href="../tryx/Safe-class.html">Safe</a></span> 
+
+</dt>
+<dd>
+  Advanced configuration class for safe execution with retry, timeout, and logging.
+</dd>
+
+          <dt id="Success">
+  <span class="name "><a href="../tryx/Success-class.html">Success</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span></span> 
+
+</dt>
+<dd>
+  Success state implementation of <a href="../tryx/Result-class.html">Result</a>.
+</dd>
+
+          <dt id="TryxConfig">
+  <span class="name "><a href="../tryx/TryxConfig-class.html">TryxConfig</a></span> 
+
+</dt>
+<dd>
+  Global configuration for the Tryx library.
+</dd>
+
+          <dt id="TryxConfigPresets">
+  <span class="name "><a href="../tryx/TryxConfigPresets-class.html">TryxConfigPresets</a></span> 
+
+</dt>
+<dd>
+  Predefined configuration presets for common use cases.
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="enums">
+      <h2>Enums</h2>
+      <dl>
+          <dt id="LogLevel">
+  <span class="name "><a href="../tryx/LogLevel.html">LogLevel</a></span> 
+
+</dt>
+<dd>
+  Log levels for global logging.
+</dd>
+
+      </dl>
+    </section>
+
+
+
+    <section class="summary offset-anchor" id="extensions">
+      <h2>Extensions</h2>
+      <dl>
+          <dt id="FutureResultExtensions">
+  <span class="name "><a href="../tryx/FutureResultExtensions.html">FutureResultExtensions</a></span>
+  on <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span>
+  
+
+</dt>
+<dd>
+  Extensions for working with <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future&lt;Result&gt;</a> instances.
+</dd>
+
+          <dt id="LogLevelExtensions">
+  <span class="name "><a href="../tryx/LogLevelExtensions.html">LogLevelExtensions</a></span>
+  on <a href="../tryx/LogLevel.html">LogLevel</a>
+  
+
+</dt>
+<dd>
+  Extension methods for LogLevel enum.
+</dd>
+
+          <dt id="ResultExtensions">
+  <span class="name "><a href="../tryx/ResultExtensions.html">ResultExtensions</a></span>
+  on <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span>
+  
+
+</dt>
+<dd>
+  Extensions that add functional programming methods to <a href="../tryx/Result-class.html">Result</a>.
+</dd>
+
+          <dt id="StreamResultExtensions">
+  <span class="name "><a href="../tryx/StreamResultExtensions.html">StreamResultExtensions</a></span>
+  on <a href="https://api.flutter.dev/flutter/dart-core/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span>
+  
+
+</dt>
+<dd>
+  Extensions for working with <a href="https://api.flutter.dev/flutter/dart-core/Stream-class.html">Stream&lt;Result&gt;</a> instances.
+</dd>
+
+          <dt id="StreamSafeExtensions">
+  <span class="name "><a href="../tryx/StreamSafeExtensions.html">StreamSafeExtensions</a></span>
+  on <a href="https://api.flutter.dev/flutter/dart-core/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span>
+  
+
+</dt>
+<dd>
+  Extensions for working with <a href="https://api.flutter.dev/flutter/dart-core/Stream-class.html">Stream</a> instances and converting them to safe streams.
+</dd>
+
+      </dl>
+    </section>
+
+
+
+    <section class="summary offset-anchor" id="functions">
+      <h2>Functions</h2>
+      <dl class="callables">
+          <dt id="combineResults" class="callable">
+  <span class="name"><a href="../tryx/combineResults.html">combineResults</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="combineResults-param-results"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span> <span class="parameter-name">results</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Utility functions for combining and transforming <a href="../tryx/Result-class.html">Result</a> instances.
+  
+
+</dd>
+
+          <dt id="combineResults2" class="callable">
+  <span class="name"><a href="../tryx/combineResults2.html">combineResults2</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T1</span>, <span class="type-parameter">T2</span>, <span class="type-parameter">R</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="combineResults2-param-result1"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T1</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result1</span>, </span><span class="parameter" id="combineResults2-param-result2"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T2</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result2</span>, </span><span class="parameter" id="combineResults2-param-combiner"><span class="type-annotation">R</span> <span class="parameter-name">combiner</span>(<span class="parameter" id="param-value1"><span class="type-annotation">T1</span> <span class="parameter-name">value1</span>, </span><span class="parameter" id="param-value2"><span class="type-annotation">T2</span> <span class="parameter-name">value2</span></span>)</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">R</span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Combines two <a href="../tryx/Result-class.html">Result</a> instances using a combining function.
+  
+
+</dd>
+
+          <dt id="combineResults3" class="callable">
+  <span class="name"><a href="../tryx/combineResults3.html">combineResults3</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T1</span>, <span class="type-parameter">T2</span>, <span class="type-parameter">T3</span>, <span class="type-parameter">R</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="combineResults3-param-result1"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T1</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result1</span>, </span><span class="parameter" id="combineResults3-param-result2"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T2</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result2</span>, </span><span class="parameter" id="combineResults3-param-result3"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T3</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result3</span>, </span><span class="parameter" id="combineResults3-param-combiner"><span class="type-annotation">R</span> <span class="parameter-name">combiner</span>(<span class="parameter" id="param-value1"><span class="type-annotation">T1</span> <span class="parameter-name">value1</span>, </span><span class="parameter" id="param-value2"><span class="type-annotation">T2</span> <span class="parameter-name">value2</span>, </span><span class="parameter" id="param-value3"><span class="type-annotation">T3</span> <span class="parameter-name">value3</span></span>)</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">R</span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Combines three <a href="../tryx/Result-class.html">Result</a> instances using a combining function.
+  
+
+</dd>
+
+          <dt id="combineResultsCollectingErrors" class="callable">
+  <span class="name"><a href="../tryx/combineResultsCollectingErrors.html">combineResultsCollectingErrors</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="combineResultsCollectingErrors-param-results"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span> <span class="parameter-name">results</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Combines multiple <a href="../tryx/Result-class.html">Result</a> instances, collecting all errors.
+  
+
+</dd>
+
+          <dt id="fromBool" class="callable">
+  <span class="name"><a href="../tryx/fromBool.html">fromBool</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="fromBool-param-condition"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">condition</span>, </span><span class="parameter" id="fromBool-param-valueProvider"><span class="type-annotation">T</span> <span class="parameter-name">valueProvider</span>(), </span><span class="parameter" id="fromBool-param-errorProvider"><span class="type-annotation">E</span> <span class="parameter-name">errorProvider</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a boolean condition to a <a href="../tryx/Result-class.html">Result</a>.
+  
+
+</dd>
+
+          <dt id="fromNullable" class="callable">
+  <span class="name"><a href="../tryx/fromNullable.html">fromNullable</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="fromNullable-param-value"><span class="type-annotation">T?</span> <span class="parameter-name">value</span>, </span><span class="parameter" id="fromNullable-param-errorProvider"><span class="type-annotation">E</span> <span class="parameter-name">errorProvider</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a nullable value to a <a href="../tryx/Result-class.html">Result</a>.
+  
+
+</dd>
+
+          <dt id="partitionResults" class="callable">
+  <span class="name"><a href="../tryx/partitionResults.html">partitionResults</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="partitionResults-param-results"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span> <span class="parameter-name">results</span></span>)
+    <span class="returntype parameter">&#8594; (<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">E</span>&gt;</span></span> <span class="field-name">failures</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="field-name">successes</span>}</span>)</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Partitions a list of <a href="../tryx/Result-class.html">Result</a> instances into successes and failures.
+  
+
+</dd>
+
+          <dt id="safe" class="callable">
+  <span class="name"><a href="../tryx/safe.html">safe</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="safe-param-fn"><span class="type-annotation">T</span> <span class="parameter-name">fn</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/SafeResult.html">SafeResult</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Safely executes a synchronous function and returns a <a href="../tryx/SafeResult.html">SafeResult</a>.
+  
+
+</dd>
+
+          <dt id="safeAsync" class="callable">
+  <span class="name"><a href="../tryx/safeAsync.html">safeAsync</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="safeAsync-param-fn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">fn</span>()</span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/SafeResult.html">SafeResult</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Safely executes an asynchronous function and returns a <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a> of <a href="../tryx/SafeResult.html">SafeResult</a>.
+  
+
+</dd>
+
+          <dt id="safeWith" class="callable">
+  <span class="name"><a href="../tryx/safeWith.html">safeWith</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="safeWith-param-fn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">fn</span>(), {</span><span class="parameter" id="safeWith-param-errorMapper"><span class="type-annotation">E</span> <span class="parameter-name">errorMapper</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)?</span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Safely executes a function with custom error mapping.
+  
+
+</dd>
+
+          <dt id="sequence" class="callable">
+  <span class="name"><a href="../tryx/sequence.html">sequence</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="sequence-param-results"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span>&gt;</span></span> <span class="parameter-name">results</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sequences a list of <a href="../tryx/Result-class.html">Result</a> instances.
+  
+
+</dd>
+
+          <dt id="toNullable" class="callable">
+  <span class="name"><a href="../tryx/toNullable.html">toNullable</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="toNullable-param-result"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">result</span></span>)
+    <span class="returntype parameter">&#8594; T?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a <a href="../tryx/Result-class.html">Result</a> to a nullable value.
+  
+
+</dd>
+
+          <dt id="traverse" class="callable">
+  <span class="name"><a href="../tryx/traverse.html">traverse</a></span><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">R</span>, <span class="type-parameter">E extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="traverse-param-values"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">values</span>, </span><span class="parameter" id="traverse-param-fn"><span class="type-annotation"><a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">R</span>, <span class="type-parameter">E</span>&gt;</span></span> <span class="parameter-name">fn</span>(<span class="parameter" id="param-value"><span class="type-annotation">T</span> <span class="parameter-name">value</span></span>)</span>)
+    <span class="returntype parameter">&#8594; <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">R</span>&gt;</span></span>, <span class="type-parameter">E</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Traverses a list of values, applying a function that returns a <a href="../tryx/Result-class.html">Result</a>.
+  
+
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="typedefs">
+      <h2>Typedefs</h2>
+      <dl>
+          
+  <dt id="SafeResult" class="">
+  <span class="name"><a href="../tryx/SafeResult.html">SafeResult</a></span>&lt;<wbr><span class="type-parameter">T</span>&gt;
+    = <a href="../tryx/Result-class.html">Result</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Exception-class.html">Exception</a></span>&gt;</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Type alias for common usage with <a href="https://api.flutter.dev/flutter/dart-core/Exception-class.html">Exception</a> as the error type.
+  
+
+</dd>
+
+
+      </dl>
+    </section>
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">tryx</a></li>
+    <li class="self-crumb">tryx.dart</li>
+</ol>
+
+    <h5><span class="package-name">tryx</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="../tryx/">tryx</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <h5>tryx library</h5>
+  </div><!--/sidebar-offcanvas-right-->
+</main>
+<footer>
+  <span class="no-break">
+    tryx
+      0.1.0
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

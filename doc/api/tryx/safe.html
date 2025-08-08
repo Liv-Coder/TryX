@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the safe function from the tryx library, for the Dart programming language.">
+  <title>safe function - tryx library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">tryx</a></li>
+    <li><a href="../tryx/">tryx.dart</a></li>
+    <li class="self-crumb">safe&lt;<wbr><span class="type-parameter">T</span>&gt; function</li>
+  </ol>
+  <div class="self-name">safe</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="tryx&#47;tryx-library-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-function">safe&lt;<wbr><span class="type-parameter">T</span>&gt;</span> function 
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+<span class="returntype"><a href="../tryx/SafeResult.html">SafeResult</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>
+<span class="name ">safe</span>&lt;<wbr><span class="type-parameter">T</span>&gt;(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="safe-param-fn"><span class="type-annotation">T</span> <span class="parameter-name">fn</span>()</span></li>
+</ol>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Safely executes a synchronous function and returns a <a href="../tryx/SafeResult.html">SafeResult</a>.</p>
+<p>This function wraps the execution of <code>fn</code> in a try-catch block and
+returns a <a href="../tryx/Result-class.html">Result</a> that either contains the successful return value
+or the caught exception.</p>
+<p>Any thrown object that is not an <a href="https://api.flutter.dev/flutter/dart-core/Exception-class.html">Exception</a> will be converted to
+an <a href="https://api.flutter.dev/flutter/dart-core/Exception-class.html">Exception</a> with the object's string representation as the message.</p>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">// Successful execution
+final result = safe(() =&gt; int.parse('42'));
+print(result.isSuccess); // true
+print(result.value); // 42
+
+// Failed execution
+final failedResult = safe(() =&gt; int.parse('invalid'));
+print(failedResult.isFailure); // true
+print(failedResult.error); // FormatException: Invalid radix-10 number
+</code></pre>
+<p>See also:</p>
+<ul>
+<li><a href="../tryx/safeAsync.html">safeAsync</a> for asynchronous operations</li>
+<li><a href="../tryx/safeWith.html">safeWith</a> for custom error mapping</li>
+</ul>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">SafeResult&lt;T&gt; safe&lt;T&gt;(T Function() fn) {
+  try {
+    final result = fn();
+    return Result.success(result);
+  } catch (error, stackTrace) {
+    final exception = _convertToException(error, stackTrace);
+    return Result.failure(exception);
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">tryx</a></li>
+    <li><a href="../tryx/">tryx</a></li>
+    <li class="self-crumb">safe&lt;<wbr><span class="type-parameter">T</span>&gt; function</li>
+</ol>
+
+    <h5>tryx library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-left-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    tryx
+      0.1.0
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

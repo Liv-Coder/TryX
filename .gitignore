@@ -1,0 +1,28 @@
+# Flutter/Dart build artifacts
+.dart_tool/
+.packages
+build/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# Sensitive and local configuration files
+*.keystore
+*.jks
+local.properties
+
+# Generated files
+lib/generated_plugin_registrant.dart
+lib/generated_plugin_registrant.dart.d
+lib/generated_plugin_registrant.dart.m
+lib/generated_plugin_registrant.dart.w
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Do not commit the lockfile for library packages
+pubspec.lock

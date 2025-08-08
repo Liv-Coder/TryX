@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the getDelay method from the RetryPolicy class, for the Dart programming language.">
+  <title>getDelay method - RetryPolicy class - tryx library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">tryx</a></li>
+    <li><a href="../../tryx/">tryx.dart</a></li>
+    <li><a href="../../tryx/RetryPolicy-class.html">RetryPolicy</a></li>
+    <li class="self-crumb">getDelay method</li>
+  </ol>
+  <div class="self-name">getDelay</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="tryx&#47;RetryPolicy-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">getDelay</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+<span class="name ">getDelay</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getDelay-param-attemptNumber"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attemptNumber</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Calculates the delay for a specific attempt number.</p>
+<p><code>attemptNumber</code> is 1-based (1 for first retry, 2 for second retry, etc.).
+Returns the duration to wait before the retry attempt.</p>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">final policy = RetryPolicy.exponentialBackoff(
+  maxAttempts: 4,
+  initialDelay: Duration(milliseconds: 100),
+  backoffMultiplier: 2.0,
+);
+
+print(policy.getDelay(1)); // ~100ms
+print(policy.getDelay(2)); // ~200ms
+print(policy.getDelay(3)); // ~400ms
+</code></pre>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Duration getDelay(int attemptNumber) {
+  if (delay == null) return Duration.zero;
+
+  Duration calculatedDelay;
+
+  if (backoffMultiplier &gt; 1.0) {
+    &#47;&#47; Exponential backoff
+    final multiplier = math.pow(backoffMultiplier, attemptNumber - 1);
+    calculatedDelay = Duration(
+      microseconds: (delay!.inMicroseconds * multiplier).round(),
+    );
+  } else {
+    &#47;&#47; Linear backoff (special case when backoffMultiplier == 1.0 but we want linear)
+    &#47;&#47; This is detected by checking if this was created with linearBackoff constructor
+    &#47;&#47; For now, we&#39;ll treat backoffMultiplier == 1.0 as fixed delay
+    calculatedDelay = delay!;
+  }
+
+  &#47;&#47; Apply maximum delay cap
+  if (maxDelay != null &amp;&amp; calculatedDelay &gt; maxDelay!) {
+    calculatedDelay = maxDelay!;
+  }
+
+  &#47;&#47; Apply jitter if enabled
+  if (jitter) {
+    final random = math.Random();
+    final jitterFactor =
+        0.5 + random.nextDouble(); &#47;&#47; Random between 0.5 and 1.5
+    calculatedDelay = Duration(
+      microseconds: (calculatedDelay.inMicroseconds * jitterFactor).round(),
+    );
+  }
+
+  return calculatedDelay;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">tryx</a></li>
+    <li><a href="../../tryx/">tryx</a></li>
+    <li><a href="../../tryx/RetryPolicy-class.html">RetryPolicy</a></li>
+    <li class="self-crumb">getDelay method</li>
+</ol>
+
+    <h5>RetryPolicy class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    tryx
+      0.1.0
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
