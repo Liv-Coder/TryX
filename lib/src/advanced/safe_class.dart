@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:tryx/src/core/result.dart';
+import 'package:meta/meta.dart';
 import 'package:tryx/src/config/retry_policy.dart';
+import 'package:tryx/src/core/result.dart';
 
 /// Advanced configuration class for safe execution with retry, timeout, and logging.
 ///
@@ -22,6 +23,7 @@ import 'package:tryx/src/config/retry_policy.dart';
 ///
 /// final result = await safeExecutor.call(() => unreliableApiCall());
 /// ```
+@immutable
 class Safe {
   /// Creates a Safe instance with the specified configuration.
   ///
@@ -53,16 +55,12 @@ class Safe {
   /// );
   /// ```
   const Safe.network({
-    Duration? timeout,
-    RetryPolicy? retryPolicy,
-    Object Function(Object error)? errorMapper,
-    void Function(Object error, int attempt)? logger,
-    void Function(Object error, int attempt, Duration delay)? onRetry,
-  }) : timeout = timeout ?? const Duration(seconds: 30),
-       retryPolicy = retryPolicy ?? RetryPolicies.network,
-       errorMapper = errorMapper,
-       logger = logger,
-       onRetry = onRetry;
+    this.timeout = const Duration(seconds: 30),
+    this.retryPolicy = RetryPolicies.network,
+    this.errorMapper,
+    this.logger,
+    this.onRetry,
+  });
 
   /// Creates a Safe instance optimized for database operations.
   ///
@@ -78,16 +76,12 @@ class Safe {
   /// );
   /// ```
   const Safe.database({
-    Duration? timeout,
-    RetryPolicy? retryPolicy,
-    Object Function(Object error)? errorMapper,
-    void Function(Object error, int attempt)? logger,
-    void Function(Object error, int attempt, Duration delay)? onRetry,
-  }) : timeout = timeout ?? const Duration(seconds: 10),
-       retryPolicy = retryPolicy ?? RetryPolicies.conservative,
-       errorMapper = errorMapper,
-       logger = logger,
-       onRetry = onRetry;
+    this.timeout = const Duration(seconds: 10),
+    this.retryPolicy = RetryPolicies.conservative,
+    this.errorMapper,
+    this.logger,
+    this.onRetry,
+  });
 
   /// Creates a Safe instance for critical operations that need aggressive retry.
   ///
@@ -103,16 +97,12 @@ class Safe {
   /// );
   /// ```
   const Safe.critical({
-    Duration? timeout,
-    RetryPolicy? retryPolicy,
-    Object Function(Object error)? errorMapper,
-    void Function(Object error, int attempt)? logger,
-    void Function(Object error, int attempt, Duration delay)? onRetry,
-  }) : timeout = timeout ?? const Duration(seconds: 60),
-       retryPolicy = retryPolicy ?? RetryPolicies.aggressive,
-       errorMapper = errorMapper,
-       logger = logger,
-       onRetry = onRetry;
+    this.timeout = const Duration(seconds: 60),
+    this.retryPolicy = RetryPolicies.aggressive,
+    this.errorMapper,
+    this.logger,
+    this.onRetry,
+  });
 
   /// The timeout for the operation.
   ///
@@ -212,9 +202,9 @@ class Safe {
         // Execute the function with optional timeout
         final T result;
         if (timeout != null) {
-          result = await Future.value(fn()).timeout(timeout!);
+          result = await Future.sync(fn).timeout(timeout!);
         } else {
-          result = await Future.value(fn());
+          result = await Future.sync(fn);
         }
 
         return Result.success(result);

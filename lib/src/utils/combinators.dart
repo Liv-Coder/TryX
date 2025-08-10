@@ -42,11 +42,13 @@ Result<List<T>, E> combineResults<T, E extends Object>(
   final values = <T>[];
 
   for (final result in results) {
-    switch (result) {
-      case Success(value: final v):
-        values.add(v);
-      case Failure(error: final e):
-        return Result.failure(e);
+    if (result is Success<T, E>) {
+      values.add(result.getOrNull() as T);
+    } else if (result is Failure<T, E>) {
+      return result.when(
+        success: (_) => throw StateError('Expected failure'),
+        failure: Result.failure,
+      );
     }
   }
 
@@ -90,11 +92,13 @@ Result<List<T>, List<E>> combineResultsCollectingErrors<T, E extends Object>(
   final errors = <E>[];
 
   for (final result in results) {
-    switch (result) {
-      case Success(value: final v):
-        values.add(v);
-      case Failure(error: final e):
-        errors.add(e);
+    if (result is Success<T, E>) {
+      values.add(result.getOrNull() as T);
+    } else if (result is Failure<T, E>) {
+      result.when(
+        success: (_) => throw StateError('Expected failure'),
+        failure: errors.add,
+      );
     }
   }
 
@@ -215,10 +219,10 @@ Result<T, E> fromNullable<T, E extends Object>(
 /// );
 /// ```
 Result<T, E> fromBool<T, E extends Object>(
-  bool condition,
   T Function() valueProvider,
-  E Function() errorProvider,
-) => condition
+  E Function() errorProvider, {
+  required bool condition,
+}) => condition
     ? Result.success(valueProvider())
     : Result.failure(errorProvider());
 
@@ -268,11 +272,13 @@ T? toNullable<T, E extends Object>(Result<T, E> result) => result.getOrNull();
   final failures = <E>[];
 
   for (final result in results) {
-    switch (result) {
-      case Success(value: final v):
-        successes.add(v);
-      case Failure(error: final e):
-        failures.add(e);
+    if (result is Success<T, E>) {
+      successes.add(result.getOrNull() as T);
+    } else if (result is Failure<T, E>) {
+      result.when(
+        success: (_) => throw StateError('Expected failure'),
+        failure: failures.add,
+      );
     }
   }
 

@@ -25,16 +25,16 @@
 ///
 /// ## Core Concepts
 ///
-/// ### Result<T, E>
+/// ### `Result<T, E>`
 /// The foundation of Tryx is the [Result] type that encapsulates success and failure states:
 /// - [Success]: Contains a value of type T
 /// - [Failure]: Contains an error of type E
-/// - [SafeResult]: Type alias for Result<T, Exception>
+/// - `SafeResult`: Type alias for `Result<T, Exception>`
 ///
 /// ### Safe Functions
-/// - [safe]: Wraps synchronous operations
-/// - [safeAsync]: Wraps asynchronous operations
-/// - [safeWith]: Wraps operations with custom error mapping
+/// - `safe`: Wraps synchronous operations
+/// - `safeAsync`: Wraps asynchronous operations
+/// - `safeWith`: Wraps operations with custom error mapping
 ///
 /// ### Method Chaining
 /// Results support functional programming patterns:
@@ -83,45 +83,34 @@
 /// ```
 ///
 /// See also:
-/// - [Result] for the core type documentation
-/// - [safe] for synchronous operation wrapping
-/// - [safeAsync] for asynchronous operation wrapping
-/// - [ResultExtensions] for method chaining operations
+/// - `Result` for the core type documentation
+/// - `safe` for synchronous operation wrapping
+/// - `safeAsync` for asynchronous operation wrapping
+/// - `ResultExtensions` for method chaining operations
 library;
 
-import 'package:tryx/src/core/result.dart'
-    show Result, Success, Failure, SafeResult;
+import 'package:tryx/src/core/result.dart' show Result, Success, Failure;
 import 'package:tryx/src/extensions/result_extensions.dart'
     show ResultExtensions;
-import 'package:tryx/tryx.dart'
-    show Result, Success, Failure, SafeResult, ResultExtensions;
 
+// Advanced error recovery patterns
+export 'src/advanced/error_recovery.dart';
+export 'src/advanced/safe_class.dart';
+// Advanced configuration and retry policies
+export 'src/config/retry_policy.dart';
+// Global configuration system
+export 'src/config/tryx_config.dart';
 // Remove circular import - exports handle the public API
 
 // Core types
 export 'src/core/result.dart';
-
-// Primary API functions
-export 'src/functions/safe.dart';
-
 // Extensions for functional programming
 export 'src/extensions/result_extensions.dart';
-
-// Advanced configuration and retry policies
-export 'src/config/retry_policy.dart';
-export 'src/advanced/safe_class.dart';
-
-// Utility functions for combining and transforming results
-export 'src/utils/combinators.dart';
-
 // Stream extensions for reactive programming
 export 'src/extensions/stream_extensions.dart';
-
-// Global configuration system
-export 'src/config/tryx_config.dart';
-
-// Advanced error recovery patterns
-export 'src/advanced/error_recovery.dart';
-
+// Primary API functions
+export 'src/functions/safe.dart';
 // Migration helpers and tools
 export 'src/migration/migration_helpers.dart';
+// Utility functions for combining and transforming results
+export 'src/utils/combinators.dart';

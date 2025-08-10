@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tryx/tryx.dart';
 
 import 'core/app_router.dart';
 import 'core/theme.dart';

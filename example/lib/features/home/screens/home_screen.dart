@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/app_router.dart';
-import '../../../core/theme.dart';
-import '../widgets/feature_card.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/stats_section.dart';
+import '../widgets/feature_card.dart';
 
 /// Home screen showcasing the Tryx demo app features
 class HomeScreen extends StatelessWidget {
@@ -81,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                         ),
                   ),
                   const SizedBox(height: 24),

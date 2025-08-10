@@ -34,12 +34,15 @@ void basicSafeUsage() {
   // Successful operation
   final successResult = safe(() => int.parse('42'));
   print('Parsing "42": ${successResult.isSuccess ? "Success" : "Failed"}');
-  print('Value: ${successResult.value}');
+  print('Value: ${successResult.getOrNull()}');
 
   // Failed operation
   final failureResult = safe(() => int.parse('invalid'));
   print('Parsing "invalid": ${failureResult.isSuccess ? "Success" : "Failed"}');
-  print('Error: ${failureResult.error}');
+  failureResult.when(
+    success: (value) => print('Value: $value'),
+    failure: (error) => print('Error: $error'),
+  );
 
   print('');
 }
@@ -94,7 +97,7 @@ void errorRecovery() {
         .recover((error) => -1) // Use -1 as fallback for parse errors
         .map((number) => 'Number: $number');
 
-    print('Input "$input" -> ${result.value}');
+    print('Input "$input" -> ${result.getOrNull()}');
   }
 
   print('');

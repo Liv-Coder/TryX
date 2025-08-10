@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:tryx/tryx.dart';
 
 /// Configure Tryx globally for the demo application
@@ -22,8 +23,8 @@ void configureTryxForDemo() {
 
     // Set custom global error handler for demo logging
     globalErrorHandler: (error, stackTrace) {
-      print('🚨 Global Error Handler: $error');
-      print('Stack trace: $stackTrace');
+      debugPrint('🚨 Global Error Handler: $error');
+      debugPrint('Stack trace: $stackTrace');
     },
 
     // Configure timeout defaults

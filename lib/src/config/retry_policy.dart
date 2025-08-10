@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 /// Configuration for retry behavior in safe operations.
 ///
 /// [RetryPolicy] defines how many times an operation should be retried
@@ -23,6 +25,7 @@ import 'dart:math' as math;
 ///   maxDelay: Duration(seconds: 10),
 /// );
 /// ```
+@immutable
 class RetryPolicy {
   /// Creates a retry policy with the specified configuration.
   ///
@@ -230,25 +233,20 @@ class RetryPolicy {
 
   @override
   String toString() {
-    final buffer = StringBuffer('RetryPolicy(');
-    buffer.write('maxAttempts: $maxAttempts');
-
+    final buffer = StringBuffer('RetryPolicy(')
+      ..write('maxAttempts: $maxAttempts');
     if (delay != null) {
       buffer.write(', delay: $delay');
     }
-
     if (backoffMultiplier != 1.0) {
       buffer.write(', backoffMultiplier: $backoffMultiplier');
     }
-
     if (maxDelay != null) {
       buffer.write(', maxDelay: $maxDelay');
     }
-
     if (jitter) {
       buffer.write(', jitter: true');
     }
-
     buffer.write(')');
     return buffer.toString();
   }

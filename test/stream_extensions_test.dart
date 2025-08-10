@@ -11,25 +11,31 @@ void main() {
         final safeStream = controller.stream.safeStream<String, Exception>();
 
         final results = <Result<String, Exception>>[];
-        final subscription = safeStream.listen(results.add);
+        safeStream.listen(results.add);
 
-        controller.add('hello');
-        controller.add('world');
-        controller.addError(Exception('test error'));
-        controller.add('after error');
-        await controller.close();
-
-        await subscription.cancel();
+        controller
+          ..add('hello')
+          ..add('world')
+          ..addError(Exception('test error'))
+          ..add('after error');
+        unawaited(controller.close());
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(results, hasLength(4));
         expect(results[0].isSuccess, isTrue);
-        expect(results[0].value, equals('hello'));
+        expect(results[0].getOrNull(), equals('hello'));
         expect(results[1].isSuccess, isTrue);
-        expect(results[1].value, equals('world'));
+        expect(results[1].getOrNull(), equals('world'));
         expect(results[2].isFailure, isTrue);
-        expect(results[2].error.toString(), contains('test error'));
+        expect(
+          results[2].when(
+            success: (_) => throw StateError('Expected failure'),
+            failure: (e) => e.toString(),
+          ),
+          contains('test error'),
+        );
         expect(results[3].isSuccess, isTrue);
-        expect(results[3].value, equals('after error'));
+        expect(results[3].getOrNull(), equals('after error'));
       },
     );
 
@@ -37,58 +43,52 @@ void main() {
       final stream = Stream.fromIterable(['1', '2', 'invalid', '4']);
       final results = <Result<int, Exception>>[];
 
-      await for (final result in stream.safeMap<int, Exception>(int.parse)) {
-        results.add(result);
-      }
+      await stream.safeMap<int, Exception>(int.parse).forEach(results.add);
 
       expect(results, hasLength(4));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals(2));
+      expect(results[1].getOrNull(), equals(2));
       expect(results[2].isFailure, isTrue);
       expect(results[3].isSuccess, isTrue);
-      expect(results[3].value, equals(4));
+      expect(results[3].getOrNull(), equals(4));
     });
 
     test('safeAsyncMap transforms values asynchronously', () async {
       final stream = Stream.fromIterable([1, 2, 3]);
       final results = <Result<String, Exception>>[];
 
-      await for (final result in stream.safeAsyncMap<String, Exception>(
-        (n) async => 'Number: $n',
-      )) {
-        results.add(result);
-      }
+      await stream
+          .safeAsyncMap<String, Exception>((n) async => 'Number: $n')
+          .forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals('Number: 1'));
+      expect(results[0].getOrNull(), equals('Number: 1'));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals('Number: 2'));
+      expect(results[1].getOrNull(), equals('Number: 2'));
       expect(results[2].isSuccess, isTrue);
-      expect(results[2].value, equals('Number: 3'));
+      expect(results[2].getOrNull(), equals('Number: 3'));
     });
 
     test('safeExpand expands values safely', () async {
       final stream = Stream.fromIterable(['1,2', '3,4', 'invalid']);
       final results = <Result<int, Exception>>[];
 
-      await for (final result in stream.safeExpand<int, Exception>(
-        (s) => s.split(',').map(int.parse),
-      )) {
-        results.add(result);
-      }
+      await stream
+          .safeExpand<int, Exception>((s) => s.split(',').map(int.parse))
+          .forEach(results.add);
 
       expect(results, hasLength(5)); // 2 + 2 + 1 error
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals(2));
+      expect(results[1].getOrNull(), equals(2));
       expect(results[2].isSuccess, isTrue);
-      expect(results[2].value, equals(3));
+      expect(results[2].getOrNull(), equals(3));
       expect(results[3].isSuccess, isTrue);
-      expect(results[3].value, equals(4));
+      expect(results[3].getOrNull(), equals(4));
       expect(results[4].isFailure, isTrue);
     });
 
@@ -96,35 +96,39 @@ void main() {
       final stream = Stream.fromIterable([1, 2, 3, 4, 5]);
       final results = <Result<int, Exception>>[];
 
-      await for (final result in stream.safeWhere<Exception>((n) => n.isEven)) {
-        results.add(result);
-      }
+      await stream.safeWhere<Exception>((n) => n.isEven).forEach(results.add);
 
       expect(results, hasLength(2)); // Only even numbers
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(2));
+      expect(results[0].getOrNull(), equals(2));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals(4));
+      expect(results[1].getOrNull(), equals(4));
     });
 
     test('errorMapper transforms errors', () async {
       final stream = Stream.fromIterable(['1', 'invalid', '3']);
       final results = <Result<int, String>>[];
 
-      await for (final result in stream.safeMap<int, String>(
-        int.parse,
-        errorMapper: (error) => 'Parse error: $error',
-      )) {
-        results.add(result);
-      }
+      await stream
+          .safeMap<int, String>(
+            int.parse,
+            errorMapper: (error) => 'Parse error: $error',
+          )
+          .forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isFailure, isTrue);
-      expect(results[1].error, startsWith('Parse error:'));
+      expect(
+        results[1].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        startsWith('Parse error:'),
+      );
       expect(results[2].isSuccess, isTrue);
-      expect(results[2].value, equals(3));
+      expect(results[2].getOrNull(), equals(3));
     });
   });
 
@@ -137,9 +141,7 @@ void main() {
       ]);
 
       final successes = <int>[];
-      await for (final value in resultStream.successes()) {
-        successes.add(value);
-      }
+      await resultStream.successes().forEach(successes.add);
 
       expect(successes, equals([1, 3]));
     });
@@ -152,9 +154,7 @@ void main() {
       ]);
 
       final failures = <String>[];
-      await for (final error in resultStream.failures()) {
-        failures.add(error);
-      }
+      await resultStream.failures().forEach(failures.add);
 
       expect(failures, equals(['error1', 'error2']));
     });
@@ -167,17 +167,21 @@ void main() {
       ]);
 
       final results = <Result<int, String>>[];
-      await for (final result in resultStream.mapSuccesses((x) => x * 2)) {
-        results.add(result);
-      }
+      await resultStream.mapSuccesses((x) => x * 2).forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(2));
+      expect(results[0].getOrNull(), equals(2));
       expect(results[1].isFailure, isTrue);
-      expect(results[1].error, equals('error'));
+      expect(
+        results[1].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        equals('error'),
+      );
       expect(results[2].isSuccess, isTrue);
-      expect(results[2].value, equals(6));
+      expect(results[2].getOrNull(), equals(6));
     });
 
     test('safeMapSuccesses handles transformation errors', () async {
@@ -188,20 +192,31 @@ void main() {
       ]);
 
       final results = <Result<int, String>>[];
-      await for (final result in resultStream.safeMapSuccesses<int>(
-        int.parse,
-        errorMapper: (error) => 'Parse error: $error',
-      )) {
-        results.add(result);
-      }
+      await resultStream
+          .safeMapSuccesses<int>(
+            int.parse,
+            errorMapper: (error) => 'Parse error: $error',
+          )
+          .forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isFailure, isTrue);
-      expect(results[1].error, startsWith('Parse error:'));
-      expect(results[2].isFailure, isTrue);
-      expect(results[2].error, equals('original error'));
+      expect(
+        results[1].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        startsWith('Parse error:'),
+      );
+      expect(
+        results[2].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        equals('original error'),
+      );
     });
 
     test('flatMapSuccesses chains operations', () async {
@@ -212,18 +227,24 @@ void main() {
       ]);
 
       final results = <Result<int, String>>[];
-      await for (final result in resultStream.flatMapSuccesses(
-        (s) => safe(() => int.parse(s)).mapError((e) => e.toString()),
-      )) {
-        results.add(result);
-      }
+      await resultStream
+          .flatMapSuccesses(
+            (s) => safe(() => int.parse(s)).mapError((e) => e.toString()),
+          )
+          .forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isFailure, isTrue);
       expect(results[2].isFailure, isTrue);
-      expect(results[2].error, equals('original error'));
+      expect(
+        results[2].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        equals('original error'),
+      );
     });
 
     test('onSuccesses executes side effects on successes', () async {
@@ -236,9 +257,7 @@ void main() {
       final sideEffects = <int>[];
       final results = <Result<int, String>>[];
 
-      await for (final result in resultStream.onSuccesses(sideEffects.add)) {
-        results.add(result);
-      }
+      await resultStream.onSuccesses(sideEffects.add).forEach(results.add);
 
       expect(sideEffects, equals([1, 3]));
       expect(results, hasLength(3));
@@ -254,9 +273,7 @@ void main() {
       final sideEffects = <String>[];
       final results = <Result<int, String>>[];
 
-      await for (final result in resultStream.onFailures(sideEffects.add)) {
-        results.add(result);
-      }
+      await resultStream.onFailures(sideEffects.add).forEach(results.add);
 
       expect(sideEffects, equals(['error1', 'error2']));
       expect(results, hasLength(3));
@@ -270,17 +287,15 @@ void main() {
       ]);
 
       final results = <Result<int, String>>[];
-      await for (final result in resultStream.recover((error) => -1)) {
-        results.add(result);
-      }
+      await resultStream.recover((error) => -1).forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals(-1));
+      expect(results[1].getOrNull(), equals(-1));
       expect(results[2].isSuccess, isTrue);
-      expect(results[2].value, equals(3));
+      expect(results[2].getOrNull(), equals(3));
     });
 
     test('recoverWith provides fallback Results for failures', () async {
@@ -291,21 +306,27 @@ void main() {
       ]);
 
       final results = <Result<int, String>>[];
-      await for (final result in resultStream.recoverWith(
-        (error) => error == 'recoverable'
-            ? const Result.success(0)
-            : Result.failure(error),
-      )) {
-        results.add(result);
-      }
+      await resultStream
+          .recoverWith(
+            (error) => error == 'recoverable'
+                ? const Result.success(0)
+                : Result.failure(error),
+          )
+          .forEach(results.add);
 
       expect(results, hasLength(3));
       expect(results[0].isSuccess, isTrue);
-      expect(results[0].value, equals(1));
+      expect(results[0].getOrNull(), equals(1));
       expect(results[1].isSuccess, isTrue);
-      expect(results[1].value, equals(0));
+      expect(results[1].getOrNull(), equals(0));
       expect(results[2].isFailure, isTrue);
-      expect(results[2].error, equals('unrecoverable'));
+      expect(
+        results[2].when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        equals('unrecoverable'),
+      );
     });
 
     test(
@@ -320,7 +341,7 @@ void main() {
 
         final successResult = await successStream.collectResults();
         expect(successResult.isSuccess, isTrue);
-        expect(successResult.value, equals([1, 2, 3]));
+        expect(successResult.getOrNull(), equals([1, 2, 3]));
 
         // With failure
         final failureStream = Stream.fromIterable([
@@ -331,7 +352,13 @@ void main() {
 
         final failureResult = await failureStream.collectResults();
         expect(failureResult.isFailure, isTrue);
-        expect(failureResult.error, equals('error'));
+        expect(
+          failureResult.when(
+            success: (_) => throw StateError('Expected failure'),
+            failure: (e) => e,
+          ),
+          equals('error'),
+        );
       },
     );
 
@@ -376,7 +403,14 @@ void main() {
               .where(
                 (result) =>
                     result.isSuccess ||
-                    (result.isFailure && result.error!.contains('invalid')),
+                    (result.isFailure &&
+                        result
+                            .when(
+                              success: (_) =>
+                                  throw StateError('Expected failure'),
+                              failure: (e) => e.toString(),
+                            )
+                            .contains('invalid')),
               )
               .mapSuccesses((n) => n * 2)
               .onSuccesses(results.add)
@@ -394,17 +428,15 @@ void main() {
 
       final results = <String>[];
 
-      await for (final result
-          in inputStream
-              .safeAsyncMap<String, String>((n) async {
-                await Future.delayed(const Duration(milliseconds: 10));
-                if (n == 3) throw Exception('Async error');
-                return 'Value: $n';
-              })
-              .recover((error) => 'Recovered from error')
-              .successes()) {
-        results.add(result);
-      }
+      await inputStream
+          .safeAsyncMap<String, String>((n) async {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+            if (n == 3) throw Exception('Async error');
+            return 'Value: $n';
+          })
+          .recover((error) => 'Recovered from error')
+          .successes()
+          .forEach(results.add);
 
       expect(
         results,

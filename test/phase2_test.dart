@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:test/test.dart';
 import 'package:tryx/tryx.dart';
 
@@ -139,7 +140,7 @@ void main() {
         final result = await safe.call<int, Exception>(() => 42);
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(42));
+        expect(result.getOrNull(), equals(42));
       });
 
       test('should catch and return exceptions', () async {
@@ -149,8 +150,14 @@ void main() {
         );
 
         expect(result.isFailure, isTrue);
-        expect(result.error, isA<Exception>());
-        expect(result.error.toString(), contains('test error'));
+        expect(result.getOrNull(), isNull);
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) {
+            expect(e, isA<Exception>());
+            expect(e.toString(), contains('test error'));
+          },
+        );
       });
 
       test('should handle async functions', () async {
@@ -160,7 +167,7 @@ void main() {
         );
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals('async result'));
+        expect(result.getOrNull(), equals('async result'));
       });
     });
 
@@ -176,7 +183,10 @@ void main() {
         );
 
         expect(result.isFailure, isTrue);
-        expect(result.error, isA<Exception>());
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, isA<TimeoutException>()),
+        );
       });
 
       test('should not timeout fast operations', () async {
@@ -190,7 +200,7 @@ void main() {
         );
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals('fast enough'));
+        expect(result.getOrNull(), equals('fast enough'));
       });
     });
 
@@ -208,7 +218,7 @@ void main() {
         });
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(3));
+        expect(result.getOrNull(), equals(3));
         expect(attempts, equals(3));
       });
 
@@ -237,8 +247,15 @@ void main() {
         );
 
         expect(result.isFailure, isTrue);
-        expect(result.error, startsWith('Mapped:'));
-        expect(result.error, contains('original error'));
+        expect(result.getOrNull(), isNull);
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) {
+            expect(e, isA<String>());
+            expect(e, startsWith('Mapped:'));
+            expect(e, contains('original error'));
+          },
+        );
       });
     });
 
@@ -314,7 +331,7 @@ void main() {
 
         expect(result, isA<SafeResult<int>>());
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(42));
+        expect(result.getOrNull(), equals(42));
       });
 
       test('should provide static executeWith method', () async {
@@ -324,7 +341,7 @@ void main() {
         );
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals(42));
+        expect(result.getOrNull(), equals(42));
       });
     });
 
@@ -352,7 +369,7 @@ void main() {
         final combined = combineResults(results);
 
         expect(combined.isSuccess, isTrue);
-        expect(combined.value, equals([1, 2, 3]));
+        expect(combined.getOrNull(), equals([1, 2, 3]));
       });
 
       test('should return first failure', () {
@@ -366,7 +383,10 @@ void main() {
         final combined = combineResults(results);
 
         expect(combined.isFailure, isTrue);
-        expect(combined.error, equals('error1'));
+        combined.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, equals('error1')),
+        );
       });
 
       test('should handle empty list', () {
@@ -374,7 +394,7 @@ void main() {
         final combined = combineResults(results);
 
         expect(combined.isSuccess, isTrue);
-        expect(combined.value, isEmpty);
+        expect(combined.getOrNull(), isEmpty);
       });
     });
 
@@ -386,7 +406,7 @@ void main() {
         final combined = combineResults2(result1, result2, (a, b) => a + b);
 
         expect(combined.isSuccess, isTrue);
-        expect(combined.value, equals(8));
+        expect(combined.getOrNull(), equals(8));
       });
 
       test('should return failure if first fails', () {
@@ -396,7 +416,10 @@ void main() {
         final combined = combineResults2(result1, result2, (a, b) => a + b);
 
         expect(combined.isFailure, isTrue);
-        expect(combined.error, equals('error'));
+        combined.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, equals('error')),
+        );
       });
     });
 
@@ -405,38 +428,44 @@ void main() {
         final result = fromNullable('hello', () => 'was null');
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals('hello'));
+        expect(result.getOrNull(), equals('hello'));
       });
 
       test('should convert null to failure', () {
         final result = fromNullable<String, String>(null, () => 'was null');
 
         expect(result.isFailure, isTrue);
-        expect(result.error, equals('was null'));
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, equals('was null')),
+        );
       });
     });
 
     group('fromBool', () {
       test('should convert true to success', () {
         final result = fromBool(
-          true,
           () => 'success value',
           () => 'error value',
+          condition: true,
         );
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals('success value'));
+        expect(result.getOrNull(), equals('success value'));
       });
 
       test('should convert false to failure', () {
         final result = fromBool(
-          false,
           () => 'success value',
           () => 'error value',
+          condition: false,
         );
 
         expect(result.isFailure, isTrue);
-        expect(result.error, equals('error value'));
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, equals('error value')),
+        );
       });
     });
 
@@ -478,7 +507,7 @@ void main() {
         final result = traverse(strings, (s) => safe(() => int.parse(s)));
 
         expect(result.isSuccess, isTrue);
-        expect(result.value, equals([1, 2, 3]));
+        expect(result.getOrNull(), equals([1, 2, 3]));
       });
 
       test('should fail on first parse error', () {
@@ -486,7 +515,10 @@ void main() {
         final result = traverse(strings, (s) => safe(() => int.parse(s)));
 
         expect(result.isFailure, isTrue);
-        expect(result.error, isA<Exception>());
+        result.when(
+          success: (_) => fail('Expected failure'),
+          failure: (e) => expect(e, isA<FormatException>()),
+        );
       });
     });
   });

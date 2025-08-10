@@ -373,7 +373,7 @@ void main() {
         TryxConfig.recordPerformance(
           'failure-op',
           const Duration(seconds: 1),
-          false,
+          success: false,
         );
 
         expect(loggedMessages, hasLength(2));
@@ -451,10 +451,10 @@ void main() {
     });
 
     test('should have correct priorities', () {
-      expect(LogLevel.debug.priority, equals(0));
-      expect(LogLevel.info.priority, equals(1));
-      expect(LogLevel.warning.priority, equals(2));
-      expect(LogLevel.error.priority, equals(3));
+      expect(LogLevel.debug.index, equals(0));
+      expect(LogLevel.info.index, equals(1));
+      expect(LogLevel.warning.index, equals(2));
+      expect(LogLevel.error.index, equals(3));
     });
 
     test('should be ordered by priority', () {
@@ -464,7 +464,7 @@ void main() {
         LogLevel.warning,
         LogLevel.info,
       ];
-      levels.sort((a, b) => a.priority.compareTo(b.priority));
+      levels.sort((a, b) => a.index.compareTo(b.index));
 
       expect(
         levels,

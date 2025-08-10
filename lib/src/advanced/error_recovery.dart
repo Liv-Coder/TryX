@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:tryx/src/core/result.dart';
+import 'package:tryx/src/extensions/result_extensions.dart';
 import 'package:tryx/src/functions/safe.dart';
 
 /// Represents the state of a circuit breaker.
@@ -25,6 +26,7 @@ enum CircuitState {
 
 /// Configuration for circuit breaker behavior.
 class CircuitBreakerConfig {
+  /// Creates a [CircuitBreakerConfig].
   const CircuitBreakerConfig({
     this.failureThreshold = 5,
     this.timeout = const Duration(seconds: 60),
@@ -63,6 +65,7 @@ class CircuitBreakerConfig {
 /// final result = await circuitBreaker.execute(() => apiCall());
 /// ```
 class CircuitBreaker {
+  /// Creates a [CircuitBreaker].
   CircuitBreaker({CircuitBreakerConfig? config})
     : _config = config ?? const CircuitBreakerConfig();
   final CircuitBreakerConfig _config;
@@ -87,9 +90,16 @@ class CircuitBreaker {
     Future<Result<T, E>> Function() operation,
   ) async {
     if (_shouldReject()) {
-      return Result.failure(
-        const CircuitBreakerException('Circuit breaker is open') as E,
-      );
+      try {
+        return Result.failure(
+          const CircuitBreakerException('Circuit breaker is open') as E,
+        );
+      } on Exception catch (_) {
+        throw ArgumentError(
+          'The error type E is not compatible with CircuitBreakerException. '
+          'Consider using a common supertype for your errors.',
+        );
+      }
     }
 
     try {
@@ -102,7 +112,7 @@ class CircuitBreaker {
       }
 
       return result;
-    } catch (error) {
+    } on Exception catch (_) {
       _onFailure();
       rethrow;
     }
@@ -203,7 +213,10 @@ class CircuitBreaker {
 
 /// Exception thrown when circuit breaker rejects an operation.
 class CircuitBreakerException implements Exception {
+  /// Creates a [CircuitBreakerException].
   const CircuitBreakerException(this.message);
+
+  /// The exception message.
   final String message;
 
   @override
@@ -225,21 +238,18 @@ class FallbackChain<T, E extends Object> {
   final List<Future<Result<T, E>> Function()> _fallbacks = [];
 
   /// Adds a fallback strategy to the chain.
-  FallbackChain<T, E> addFallback(Future<Result<T, E>> Function() fallback) {
+  void addFallback(Future<Result<T, E>> Function() fallback) {
     _fallbacks.add(fallback);
-    return this;
   }
 
   /// Adds a synchronous fallback strategy to the chain.
-  FallbackChain<T, E> addSyncFallback(Result<T, E> Function() fallback) {
+  void addSyncFallback(Result<T, E> Function() fallback) {
     _fallbacks.add(() async => fallback());
-    return this;
   }
 
   /// Adds a value fallback that always succeeds.
-  FallbackChain<T, E> addValueFallback(T value) {
+  void addValueFallback(T value) {
     _fallbacks.add(() async => Result.success(value));
-    return this;
   }
 
   /// Executes the primary operation with fallback chain.
@@ -251,7 +261,7 @@ class FallbackChain<T, E extends Object> {
 
       try {
         result = await fallback();
-      } catch (error) {
+      } on Exception {
         // Continue to next fallback if this one fails
         continue;
       }
@@ -326,6 +336,7 @@ class DefaultErrorClassifier extends ErrorClassifier<Exception> {
 
 /// Adaptive recovery strategy that learns from error patterns.
 class AdaptiveRecovery<T, E extends Object> {
+  /// Creates an [AdaptiveRecovery].
   AdaptiveRecovery({ErrorClassifier<E>? classifier})
     : _classifier =
           classifier ?? DefaultErrorClassifier() as ErrorClassifier<E>;
@@ -351,22 +362,27 @@ class AdaptiveRecovery<T, E extends Object> {
         return lastResult;
       }
 
-      final error = lastResult.error!;
-      final errorKey = error.runtimeType.toString();
+      if (lastResult.isFailure) {
+        final error = lastResult.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        );
+        final errorKey = error.runtimeType.toString();
 
-      if (!_classifier.isRetryable(error) || attempt >= maxAttempts) {
-        _recordError(errorKey);
-        return lastResult;
+        if (!_classifier.isRetryable(error) || attempt >= maxAttempts) {
+          _recordError(errorKey);
+          return lastResult;
+        }
+
+        final delay = _getAdaptiveDelay(error, attempt);
+        if (maxDelay != null && delay > maxDelay) {
+          _recordError(errorKey);
+          return lastResult;
+        }
+
+        await Future<void>.delayed(delay);
+        attempt++;
       }
-
-      final delay = _getAdaptiveDelay(error, attempt);
-      if (maxDelay != null && delay > maxDelay) {
-        _recordError(errorKey);
-        return lastResult;
-      }
-
-      await Future.delayed(delay);
-      attempt++;
     }
 
     return lastResult!;
@@ -411,7 +427,7 @@ class AdaptiveRecovery<T, E extends Object> {
 
   /// Gets statistics about error patterns.
   Map<String, dynamic> getStatistics() => {
-    'errorCounts': Map.from(_errorCounts),
+    'errorCounts': Map<String, int>.from(_errorCounts),
     'lastErrorTimes': _lastErrorTimes.map(
       (key, value) => MapEntry(key, value.toIso8601String()),
     ),
@@ -423,6 +439,8 @@ class AdaptiveRecovery<T, E extends Object> {
 
 /// Bulkhead pattern implementation for isolating failures.
 class Bulkhead<T, E extends Object> {
+  /// Creates a [Bulkhead].
+  /// Creates a [Bulkhead].
   Bulkhead({
     int maxConcurrentOperations = 10,
     Duration timeout = const Duration(seconds: 30),
@@ -482,15 +500,19 @@ class Bulkhead<T, E extends Object> {
     _currentOperations--;
 
     if (_waitingQueue.isNotEmpty) {
-      final completer = _waitingQueue.removeAt(0);
-      completer.complete();
+      _waitingQueue.removeAt(0).complete();
     }
   }
 }
 
 /// Exception thrown when bulkhead operation times out.
 class BulkheadTimeoutException implements Exception {
+  /// Creates a [BulkheadTimeoutException].
+  /// Creates a [BulkheadTimeoutException].
   const BulkheadTimeoutException(this.message);
+
+  /// The exception message.
+  /// The exception message.
   final String message;
 
   @override
@@ -499,6 +521,8 @@ class BulkheadTimeoutException implements Exception {
 
 /// Comprehensive recovery orchestrator that combines multiple patterns.
 class RecoveryOrchestrator<T, E extends Object> {
+  /// Creates a [RecoveryOrchestrator].
+  /// Creates a [RecoveryOrchestrator].
   RecoveryOrchestrator({
     CircuitBreaker? circuitBreaker,
     FallbackChain<T, E>? fallbackChain,

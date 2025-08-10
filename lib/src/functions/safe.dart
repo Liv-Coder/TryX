@@ -31,7 +31,7 @@ SafeResult<T> safe<T>(T Function() fn) {
   try {
     final result = fn();
     return Result.success(result);
-  } catch (error, stackTrace) {
+  } on Exception catch (error, stackTrace) {
     final exception = _convertToException(error, stackTrace);
     return Result.failure(exception);
   }
@@ -66,7 +66,7 @@ Future<SafeResult<T>> safeAsync<T>(Future<T> Function() fn) async {
   try {
     final result = await fn();
     return Result.success(result);
-  } catch (error, stackTrace) {
+  } on Exception catch (error, stackTrace) {
     final exception = _convertToException(error, stackTrace);
     return Result.failure(exception);
   }
@@ -109,23 +109,36 @@ Future<SafeResult<T>> safeAsync<T>(Future<T> Function() fn) async {
 Future<Result<T, E>> safeWith<T, E extends Object>(
   FutureOr<T> Function() fn, {
   E Function(Object error)? errorMapper,
-}) async {
+}) {
   try {
-    final result = await fn();
-    return Result.success(result);
+    final result = fn();
+    if (result is Future<T>) {
+      return result.then<Result<T, E>>(
+        Result<T, E>.success,
+        onError: (Object error, StackTrace stacktrace) {
+          if (errorMapper != null) {
+            return Result<T, E>.failure(errorMapper(error));
+          }
+          if (error is E) {
+            return Result<T, E>.failure(error);
+          }
+          return Result<T, E>.failure(
+            Exception('Unhandled error: $error') as E,
+          );
+        },
+      );
+    }
+    return Future.value(Result.success(result));
   } on Object catch (error) {
     if (errorMapper != null) {
-      final mappedError = errorMapper(error);
-      return Result.failure(mappedError);
-    } else {
-      // If no error mapper is provided, try to cast the error to E
-      if (error is E) {
-        return Result.failure(error);
-      } else {
-        // If the error can't be cast to E, this is a programming error
-        throw TypeError();
-      }
+      return Future.value(Result.failure(errorMapper(error)));
     }
+    if (error is E) {
+      return Future.value(Result.failure(error));
+    }
+    return Future.value(
+      Result.failure(Exception('Unhandled error: $error') as E),
+    );
   }
 }
 
@@ -135,9 +148,9 @@ Future<Result<T, E>> safeWith<T, E extends Object>(
 /// Otherwise, a new [Exception] is created with the error's string
 /// representation as the message.
 ///
-/// The [stackTrace] parameter is currently unused but reserved for
-/// future enhancements that might include stack trace information
-/// in the exception.
+/// The [stackTrace] parameter is included to match the signature of a
+/// standard catch block, allowing for future integration with logging
+/// or error reporting systems that require stack traces.
 Exception _convertToException(Object error, StackTrace? stackTrace) {
   if (error is Exception) {
     return error;

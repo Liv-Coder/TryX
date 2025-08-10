@@ -8,8 +8,8 @@ library;
 import 'dart:async';
 
 import 'package:tryx/src/core/result.dart';
-import 'package:tryx/src/functions/safe.dart';
 import 'package:tryx/src/extensions/result_extensions.dart';
+import 'package:tryx/src/functions/safe.dart';
 
 /// A wrapper that helps migrate existing try-catch code to Tryx patterns.
 ///
@@ -255,7 +255,7 @@ class MigrationPatterns {
       if (resource != null) {
         try {
           release(resource as R);
-        } catch (_) {
+        } on Exception {
           // Ignore cleanup errors
         }
       }
@@ -287,10 +287,15 @@ class MigrationPatterns {
 
     for (final validator in validators) {
       final result = safe(validator);
-      if (result.isFailure) {
-        return result.map((_) => <T>[]);
+      if (result is Failure<T, Exception>) {
+        return result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: Result.failure,
+        );
       }
-      results.add(result.value as T);
+      if (result is Success<T, Exception>) {
+        results.add(result.getOrNull() as T);
+      }
     }
 
     return Result.success(results);

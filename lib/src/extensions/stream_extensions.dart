@@ -40,7 +40,7 @@ extension StreamSafeExtensions<T> on Stream<T> {
       handleData: (T data, EventSink<Result<R, E>> sink) {
         try {
           sink.add(Result<R, E>.success(data as R));
-        } catch (error) {
+        } on Exception catch (error) {
           final mappedError = errorMapper?.call(error) ?? error;
           if (mappedError is E) {
             sink.add(Result<R, E>.failure(mappedError));
@@ -158,7 +158,7 @@ extension StreamSafeExtensions<T> on Stream<T> {
           for (final item in expanded) {
             sink.add(Result<U, E>.success(item));
           }
-        } catch (error) {
+        } on Exception catch (error) {
           final mappedError = errorMapper?.call(error) ?? error;
           if (mappedError is E) {
             sink.add(Result<U, E>.failure(mappedError));
@@ -229,7 +229,7 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
   /// }
   /// ```
   Stream<T> successes() =>
-      where((result) => result.isSuccess).map((result) => result.value!);
+      where((result) => result is Success).map((result) => result.getOrNull()!);
 
   /// Filters the stream to only emit failed results.
   ///
@@ -249,8 +249,12 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
   ///   print('Error: $error'); // Prints: error1, error2
   /// }
   /// ```
-  Stream<E> failures() =>
-      where((result) => result.isFailure).map((result) => result.error!);
+  Stream<E> failures() => where((result) => result is Failure).map(
+    (result) => result.when(
+      success: (_) => throw StateError('Expected failure'),
+      failure: (error) => error,
+    ),
+  );
 
   /// Maps successful values while preserving failures.
   ///
@@ -292,9 +296,10 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
     U Function(T value) mapper, {
     E Function(Object error)? errorMapper,
   }) => map((result) {
-    if (result.isSuccess) {
+    if (result is Success<T, E>) {
       try {
-        return Result<U, E>.success(mapper(result.value as T));
+        final value = result.getOrNull() as T;
+        return Result<U, E>.success(mapper(value));
       } catch (error) {
         final mappedError = errorMapper?.call(error) ?? error;
         if (mappedError is E) {
@@ -304,7 +309,7 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
         }
       }
     } else {
-      return Result<U, E>.failure(result.error!);
+      return result as Result<U, E>;
     }
   });
 
@@ -431,11 +436,13 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
     final values = <T>[];
 
     await for (final result in this) {
-      switch (result) {
-        case Success(value: final v):
-          values.add(v);
-        case Failure(error: final e):
-          return Result.failure(e);
+      if (result is Success<T, E>) {
+        values.add(result.getOrNull() as T);
+      } else if (result is Failure<T, E>) {
+        return result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: Result.failure,
+        );
       }
     }
 
@@ -464,11 +471,13 @@ extension StreamResultExtensions<T, E extends Object> on Stream<Result<T, E>> {
     final failures = <E>[];
 
     await for (final result in this) {
-      switch (result) {
-        case Success(value: final v):
-          successes.add(v);
-        case Failure(error: final e):
-          failures.add(e);
+      if (result is Success<T, E>) {
+        successes.add(result.getOrNull() as T);
+      } else if (result is Failure<T, E>) {
+        result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: failures.add,
+        );
       }
     }
 

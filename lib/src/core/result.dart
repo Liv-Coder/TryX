@@ -60,6 +60,9 @@ sealed class Result<T, E extends Object> {
   /// print(success.value); // 42
   /// print(failure.value); // null
   /// ```
+  @Deprecated(
+    'Use `when`, `getOrNull`, or other explicit methods instead. This will be removed in a future version.',
+  )
   T? get value => switch (this) {
     Success(value: final v) => v,
     Failure() => null,
@@ -75,6 +78,9 @@ sealed class Result<T, E extends Object> {
   /// print(success.error); // null
   /// print(failure.error); // 'error'
   /// ```
+  @Deprecated(
+    'Use `when`, `onFailure`, or other explicit methods instead. This will be removed in a future version.',
+  )
   E? get error => switch (this) {
     Success() => null,
     Failure(error: final e) => e,
@@ -86,22 +92,24 @@ sealed class Result<T, E extends Object> {
 
     return other is Result<T, E> &&
         switch ((this, other)) {
-          (Success(value: final a), Success(value: final b)) => a == b,
-          (Failure(error: final a), Failure(error: final b)) => a == b,
+          (Success(), Success()) =>
+            (this as Success)._value == (other as Success)._value,
+          (Failure(), Failure()) =>
+            (this as Failure)._error == (other as Failure)._error,
           _ => false,
         };
   }
 
   @override
   int get hashCode => switch (this) {
-    Success(value: final v) => Object.hash('Success', v),
-    Failure(error: final e) => Object.hash('Failure', e),
+    Success() => Object.hash('Success', (this as Success)._value),
+    Failure() => Object.hash('Failure', (this as Failure)._error),
   };
 
   @override
   String toString() => switch (this) {
-    Success(value: final v) => 'Success($v)',
-    Failure(error: final e) => 'Failure($e)',
+    Success() => 'Success(${(this as Success)._value})',
+    Failure() => 'Failure(${(this as Failure)._error})',
   };
 }
 
@@ -120,6 +128,7 @@ final class Success<T, E extends Object> extends Result<T, E> {
   ///
   /// This getter provides direct access to the success value without
   /// null checking, since Success is guaranteed to contain a value.
+  @Deprecated('Use `when` or `getOrNull` for safe access.')
   @override
   T get value => _value;
 
@@ -151,6 +160,7 @@ final class Failure<T, E extends Object> extends Result<T, E> {
   ///
   /// This getter provides direct access to the error without null checking,
   /// since Failure is guaranteed to contain an error.
+  @Deprecated('Use `when` or `onFailure` for safe access.')
   @override
   E get error => _error;
 

@@ -247,12 +247,9 @@ class TryxConfig {
     Object? error,
     StackTrace? stackTrace,
   ) {
-    final logMessage = StringBuffer();
-    logMessage.write('[${level.name.toUpperCase()}] $message');
-
-    if (error != null) {
-      logMessage.write(' | Error: $error');
-    }
+    final logMessage = StringBuffer()
+      ..write('[${level.name.toUpperCase()}] $message')
+      ..write(error != null ? ' | Error: $error' : '');
 
     if (_instance._includeStackTraces && stackTrace != null) {
       logMessage.write('\nStack trace:\n$stackTrace');
@@ -298,7 +295,7 @@ class TryxConfig {
     if (_instance._globalErrorHandler != null) {
       try {
         _instance._globalErrorHandler!(error, stackTrace);
-      } catch (handlerError) {
+      } on Exception catch (handlerError) {
         // If the error handler itself throws, fall back to logging
         log(
           'Global error handler failed: $handlerError',
@@ -329,9 +326,9 @@ class TryxConfig {
   /// ```
   static void recordPerformance(
     String operationName,
-    Duration duration, [
+    Duration duration, {
     bool success = true,
-  ]) {
+  }) {
     if (!_instance._enablePerformanceMonitoring) {
       return;
     }
@@ -380,23 +377,19 @@ class TryxConfig {
     void Function(Object error, StackTrace stackTrace)? globalErrorHandler,
     bool? enablePerformanceMonitoring,
     Duration? slowOperationThreshold,
-  }) {
-    final newConfig = TryxConfig._();
-    newConfig._defaultRetryPolicy = defaultRetryPolicy ?? _defaultRetryPolicy;
-    newConfig._enableGlobalLogging =
-        enableGlobalLogging ?? _enableGlobalLogging;
-    newConfig._logLevel = logLevel ?? _logLevel;
-    newConfig._globalErrorMapper = globalErrorMapper ?? _globalErrorMapper;
-    newConfig._globalTimeout = globalTimeout ?? _globalTimeout;
-    newConfig._includeStackTraces = includeStackTraces ?? _includeStackTraces;
-    newConfig._customLogger = customLogger ?? _customLogger;
-    newConfig._globalErrorHandler = globalErrorHandler ?? _globalErrorHandler;
-    newConfig._enablePerformanceMonitoring =
-        enablePerformanceMonitoring ?? _enablePerformanceMonitoring;
-    newConfig._slowOperationThreshold =
+  }) => TryxConfig._()
+    .._defaultRetryPolicy = defaultRetryPolicy ?? _defaultRetryPolicy
+    .._enableGlobalLogging = enableGlobalLogging ?? _enableGlobalLogging
+    .._logLevel = logLevel ?? _logLevel
+    .._globalErrorMapper = globalErrorMapper ?? _globalErrorMapper
+    .._globalTimeout = globalTimeout ?? _globalTimeout
+    .._includeStackTraces = includeStackTraces ?? _includeStackTraces
+    .._customLogger = customLogger ?? _customLogger
+    .._globalErrorHandler = globalErrorHandler ?? _globalErrorHandler
+    .._enablePerformanceMonitoring =
+        enablePerformanceMonitoring ?? _enablePerformanceMonitoring
+    .._slowOperationThreshold =
         slowOperationThreshold ?? _slowOperationThreshold;
-    return newConfig;
-  }
 
   /// Returns a string representation of the current configuration.
   @override
@@ -429,37 +422,6 @@ enum LogLevel {
 
   /// Error level - error events that might still allow the application to continue.
   error,
-}
-
-/// Extension methods for LogLevel enum.
-extension LogLevelExtensions on LogLevel {
-  /// Gets the display name for the log level.
-  String get name {
-    switch (this) {
-      case LogLevel.debug:
-        return 'debug';
-      case LogLevel.info:
-        return 'info';
-      case LogLevel.warning:
-        return 'warning';
-      case LogLevel.error:
-        return 'error';
-    }
-  }
-
-  /// Gets the priority value for the log level.
-  int get priority {
-    switch (this) {
-      case LogLevel.debug:
-        return 0;
-      case LogLevel.info:
-        return 1;
-      case LogLevel.warning:
-        return 2;
-      case LogLevel.error:
-        return 3;
-    }
-  }
 }
 
 /// Predefined configuration presets for common use cases.
