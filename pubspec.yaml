@@ -1,5 +1,5 @@
 name: tryx
-description: A Dart library for functional, reliable, and expressive error handling.
+description: A powerful Dart library for functional, reliable, and expressive error handling using Result types. Provides type-safe error handling without exceptions, with support for async operations, streams, and advanced recovery patterns.
 version: 1.0.0
 homepage: https://github.com/Liv-Coder/tryx
 repository: https://github.com/Liv-Coder/tryx
@@ -7,9 +7,8 @@ issue_tracker: https://github.com/Liv-Coder/tryx/issues
 documentation: https://pub.dev/documentation/tryx/latest/
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.0.0 <4.0.0"
 
-# Add regular dependencies here.
 dependencies:
   meta: ^1.15.0
 
@@ -17,10 +16,6 @@ dev_dependencies:
   coverage: ^1.9.2
   lints: ^5.0.0
   test: ^1.24.0
-
-# Funding information
-funding:
-  - https://github.com/sponsors/your-org
 
 # Topics for pub.dev discoverability
 topics:
@@ -31,3 +26,6 @@ topics:
   - flutter
   - safe-execution
   - exception-handling
+  - async
+  - streams
+  - type-safety

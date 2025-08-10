@@ -1,28 +1,117 @@
-# Flutter/Dart build artifacts
+# Files and directories created by pub
 .dart_tool/
 .packages
 build/
+pubspec.lock  # Except for application packages
 
-# IDE-specific files
+# Conventional directory for build outputs
+build/
+
+# Directory created by dartdoc
+doc/api/
+
+# JetBrains IDEs
 .idea/
-.vscode/
 *.iml
+*.ipr
 *.iws
 
-# Sensitive and local configuration files
-*.keystore
-*.jks
-local.properties
+# Visual Studio Code
+.vscode/
+
+# Emacs
+*~
+
+# Vim
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Test related
+test/.test_coverage.dart
+test_driver/
+
+# Flutter/Dart specific
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
 
 # Generated files
-lib/generated_plugin_registrant.dart
-lib/generated_plugin_registrant.dart.d
-lib/generated_plugin_registrant.dart.m
-lib/generated_plugin_registrant.dart.w
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.config.dart
 
-# OS-specific files
-.DS_Store
-Thumbs.db
+# Build artifacts
+*.dill
+*.kernel
 
-# Do not commit the lockfile for library packages
-pubspec.lock
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# FVM Version Cache
+.fvm/
+
+# Analysis and linting
+.analysis_options_user.yaml
+
+# Sensitive files
+*.keystore
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+local.properties
+
+# Example app specific (should not be published)
+example/.flutter-plugins
+example/.flutter-plugins-dependencies
+example/.metadata
+example/pubspec.lock
+example/build/
+example/.dart_tool/
+example/android/
+example/ios/
+example/linux/
+example/macos/
+example/web/
+example/windows/
+example/assets/
+example/*.iml
+
+# Development artifacts
+analysis_results.txt
+CODE_REVIEW.md
+ARCHITECTURE.md
+DESIGN.md

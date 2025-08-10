@@ -67,7 +67,7 @@ class CircuitBreakerConfig {
 class CircuitBreaker {
   /// Creates a [CircuitBreaker].
   CircuitBreaker({CircuitBreakerConfig? config})
-    : _config = config ?? const CircuitBreakerConfig();
+      : _config = config ?? const CircuitBreakerConfig();
   final CircuitBreakerConfig _config;
   CircuitState _state = CircuitState.closed;
   int _failureCount = 0;
@@ -338,8 +338,8 @@ class DefaultErrorClassifier extends ErrorClassifier<Exception> {
 class AdaptiveRecovery<T, E extends Object> {
   /// Creates an [AdaptiveRecovery].
   AdaptiveRecovery({ErrorClassifier<E>? classifier})
-    : _classifier =
-          classifier ?? DefaultErrorClassifier() as ErrorClassifier<E>;
+      : _classifier =
+            classifier ?? DefaultErrorClassifier() as ErrorClassifier<E>;
   final ErrorClassifier<E> _classifier;
   final Map<String, int> _errorCounts = {};
   final Map<String, DateTime> _lastErrorTimes = {};
@@ -427,14 +427,14 @@ class AdaptiveRecovery<T, E extends Object> {
 
   /// Gets statistics about error patterns.
   Map<String, dynamic> getStatistics() => {
-    'errorCounts': Map<String, int>.from(_errorCounts),
-    'lastErrorTimes': _lastErrorTimes.map(
-      (key, value) => MapEntry(key, value.toIso8601String()),
-    ),
-    'adaptiveDelays': _adaptiveDelays.map(
-      (key, value) => MapEntry(key, value.inMilliseconds),
-    ),
-  };
+        'errorCounts': Map<String, int>.from(_errorCounts),
+        'lastErrorTimes': _lastErrorTimes.map(
+          (key, value) => MapEntry(key, value.toIso8601String()),
+        ),
+        'adaptiveDelays': _adaptiveDelays.map(
+          (key, value) => MapEntry(key, value.inMilliseconds),
+        ),
+      };
 }
 
 /// Bulkhead pattern implementation for isolating failures.
@@ -444,8 +444,8 @@ class Bulkhead<T, E extends Object> {
   Bulkhead({
     int maxConcurrentOperations = 10,
     Duration timeout = const Duration(seconds: 30),
-  }) : _maxConcurrentOperations = maxConcurrentOperations,
-       _timeout = timeout;
+  })  : _maxConcurrentOperations = maxConcurrentOperations,
+        _timeout = timeout;
   final int _maxConcurrentOperations;
   final Duration _timeout;
   int _currentOperations = 0;
@@ -528,10 +528,10 @@ class RecoveryOrchestrator<T, E extends Object> {
     FallbackChain<T, E>? fallbackChain,
     AdaptiveRecovery<T, E>? adaptiveRecovery,
     Bulkhead<T, E>? bulkhead,
-  }) : _circuitBreaker = circuitBreaker,
-       _fallbackChain = fallbackChain,
-       _adaptiveRecovery = adaptiveRecovery,
-       _bulkhead = bulkhead;
+  })  : _circuitBreaker = circuitBreaker,
+        _fallbackChain = fallbackChain,
+        _adaptiveRecovery = adaptiveRecovery,
+        _bulkhead = bulkhead;
   final CircuitBreaker? _circuitBreaker;
   final FallbackChain<T, E>? _fallbackChain;
   final AdaptiveRecovery<T, E>? _adaptiveRecovery;
@@ -546,14 +546,14 @@ class RecoveryOrchestrator<T, E extends Object> {
     // Apply bulkhead if configured
     if (_bulkhead != null) {
       final currentOperation = wrappedOperation;
-      wrappedOperation = () => _bulkhead.execute(currentOperation);
+      wrappedOperation = () => _bulkhead!.execute(currentOperation);
     }
 
     // Apply circuit breaker if configured
     if (_circuitBreaker != null) {
       final currentOperation = wrappedOperation;
       wrappedOperation = () async {
-        final result = await _circuitBreaker.execute(currentOperation);
+        final result = await _circuitBreaker!.execute(currentOperation);
         return result;
       };
     }
@@ -561,12 +561,12 @@ class RecoveryOrchestrator<T, E extends Object> {
     // Apply adaptive recovery if configured
     if (_adaptiveRecovery != null) {
       final currentOperation = wrappedOperation;
-      wrappedOperation = () => _adaptiveRecovery.execute(currentOperation);
+      wrappedOperation = () => _adaptiveRecovery!.execute(currentOperation);
     }
 
     // Apply fallback chain if configured
     if (_fallbackChain != null) {
-      return _fallbackChain.execute(wrappedOperation);
+      return _fallbackChain!.execute(wrappedOperation);
     }
 
     return wrappedOperation();

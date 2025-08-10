@@ -24,9 +24,9 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(mappedFailure.error); // 'error'
   /// ```
   Result<U, E> map<U>(U Function(T value) mapper) => switch (this) {
-    Success() => Result.success(mapper((this as Success<T, E>).value)),
-    Failure() => this as Result<U, E>,
-  };
+        Success() => Result.success(mapper((this as Success<T, E>).value)),
+        Failure() => this as Result<U, E>,
+      };
 
   /// Chains this result with another operation that returns a [Result].
   ///
@@ -89,10 +89,11 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   U when<U>({
     required U Function(T value) success,
     required U Function(E error) failure,
-  }) => switch (this) {
-    Success() => success((this as Success<T, E>).value),
-    Failure() => failure((this as Failure<T, E>).error),
-  };
+  }) =>
+      switch (this) {
+        Success() => success((this as Success<T, E>).value),
+        Failure() => failure((this as Failure<T, E>).error),
+      };
 
   /// Folds the result into a single value.
   ///
@@ -166,9 +167,9 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(failure.getOrElse(() => 0)); // 0
   /// ```
   T getOrElse(T Function() defaultValue) => switch (this) {
-    Success() => (this as Success<T, E>).value,
-    Failure() => defaultValue(),
-  };
+        Success() => (this as Success<T, E>).value,
+        Failure() => defaultValue(),
+      };
 
   /// Gets the value if this is a [Success], otherwise returns `null`.
   ///
@@ -184,9 +185,9 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(failure.getOrNull()); // null
   /// ```
   T? getOrNull() => switch (this) {
-    Success() => (this as Success<T, E>).value,
-    Failure() => null,
-  };
+        Success() => (this as Success<T, E>).value,
+        Failure() => null,
+      };
 
   /// Recovers from a failure by providing a fallback value.
   ///
@@ -201,9 +202,9 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(recovered.value); // -1
   /// ```
   Result<T, E> recover(T Function(E error) recovery) => switch (this) {
-    Success() => this,
-    Failure() => Result.success(recovery((this as Failure<T, E>).error)),
-  };
+        Success() => this,
+        Failure() => Result.success(recovery((this as Failure<T, E>).error)),
+      };
 
   /// Recovers from a failure by providing another [Result].
   ///
@@ -248,8 +249,10 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   Future<Result<U, E>> mapAsync<U>(Future<U> Function(T value) mapper) async {
     final result = await this;
     return switch (result) {
-      Success() => Result.success(await mapper(result.value)),
-      Failure() => Result.failure(result.error),
+      Success() => Result.success(await mapper(result.getOrNull() as T)),
+      Failure() => Result.failure(result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e)),
     };
   }
 
@@ -274,8 +277,10 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   ) async {
     final result = await this;
     return switch (result) {
-      Success() => await mapper(result.value),
-      Failure() => Result.failure(result.error),
+      Success() => await mapper(result.getOrNull() as T),
+      Failure() => Result.failure(result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e)),
     };
   }
 
@@ -299,8 +304,10 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   }) async {
     final result = await this;
     return switch (result) {
-      Success() => await success(result.value),
-      Failure() => await failure(result.error),
+      Success() => await success(result.getOrNull() as T),
+      Failure() => await failure(result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e)),
     };
   }
 }
