@@ -63,7 +63,7 @@ linter:
     close_sinks: true
     comment_references: true
     control_flow_in_finally: true
-    diagnostic_describe_all_properties: false # Too verbose for this library
+    diagnostic_describe_all_properties: true # Re-enabled for better documentation
     empty_statements: true
     hash_and_equals: true
     invariant_booleans: true
@@ -182,7 +182,7 @@ linter:
     prefer_iterable_whereType: true
     prefer_mixin: true
     prefer_null_aware_operators: true
-    prefer_relative_imports: false # Use package imports
+    # Removed prefer_relative_imports as it conflicts with always_use_package_imports
     prefer_single_quotes: true
     prefer_spread_collections: true
     prefer_typing_uninitialized_variables: true

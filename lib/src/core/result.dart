@@ -57,8 +57,8 @@ sealed class Result<T, E extends Object> {
   /// final success = Result<int, String>.success(42);
   /// final failure = Result<int, String>.failure('error');
   ///
-  /// print(success.value); // 42
-  /// print(failure.value); // null
+  /// print(success.getOrNull()); // 42
+  /// print(failure.getOrNull()); // null
   /// ```
   @Deprecated(
     'Use `when`, `getOrNull`, or other explicit methods instead. This will be removed in a future version.',
@@ -75,8 +75,8 @@ sealed class Result<T, E extends Object> {
   /// final success = Result<int, String>.success(42);
   /// final failure = Result<int, String>.failure('error');
   ///
-  /// print(success.error); // null
-  /// print(failure.error); // 'error'
+  /// success.when(success: (_) => null, failure: (e) => e); // null
+  /// failure.when(success: (_) => null, failure: (e) => e); // 'error'
   /// ```
   @Deprecated(
     'Use `when`, `onFailure`, or other explicit methods instead. This will be removed in a future version.',
