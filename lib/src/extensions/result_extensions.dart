@@ -17,14 +17,18 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// ```dart
   /// final result = Result<int, String>.success(42);
   /// final mapped = result.map((x) => x.toString());
-  /// print(mapped.value); // '42'
+  /// print(mapped.getOrNull()); // '42'
   ///
   /// final failure = Result<int, String>.failure('error');
   /// final mappedFailure = failure.map((x) => x.toString());
-  /// print(mappedFailure.error); // 'error'
+  /// final errorValue = mappedFailure.when(
+  ///   success: (_) => null,
+  ///   failure: (e) => e,
+  /// );
+  /// print(errorValue); // 'error'
   /// ```
   Result<U, E> map<U>(U Function(T value) mapper) => switch (this) {
-        Success() => Result.success(mapper((this as Success<T, E>).value)),
+        Success() => Result.success(mapper((this as Success<T, E>)._value)),
         Failure() => this as Result<U, E>,
       };
 
@@ -45,11 +49,11 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   ///
   /// final result = Result<String, String>.success('42');
   /// final chained = result.flatMap(parseNumber);
-  /// print(chained.value); // 42
+  /// print(chained.getOrNull()); // 42
   /// ```
   Result<U, E> flatMap<U>(Result<U, E> Function(T value) mapper) =>
       switch (this) {
-        Success() => mapper((this as Success<T, E>).value),
+        Success() => mapper((this as Success<T, E>)._value),
         Failure() => this as Result<U, E>,
       };
 
@@ -63,12 +67,16 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// ```dart
   /// final result = Result<int, String>.failure('network error');
   /// final mapped = result.mapError((error) => 'Failed: $error');
-  /// print(mapped.error); // 'Failed: network error'
+  /// final errorValue = mapped.when(
+  ///   success: (_) => null,
+  ///   failure: (e) => e,
+  /// );
+  /// print(errorValue); // 'Failed: network error'
   /// ```
   Result<T, F> mapError<F extends Object>(F Function(E error) mapper) =>
       switch (this) {
         Success() => this as Result<T, F>,
-        Failure() => Result.failure(mapper((this as Failure<T, E>).error)),
+        Failure() => Result.failure(mapper((this as Failure<T, E>)._error)),
       };
 
   /// Pattern matching that handles both success and failure cases.
@@ -91,8 +99,8 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
     required U Function(E error) failure,
   }) =>
       switch (this) {
-        Success() => success((this as Success<T, E>).value),
-        Failure() => failure((this as Failure<T, E>).error),
+        Success() => success((this as Success<T, E>)._value),
+        Failure() => failure((this as Failure<T, E>)._error),
       };
 
   /// Folds the result into a single value.
@@ -128,7 +136,7 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// ```
   Result<T, E> onSuccess(void Function(T value) action) {
     if (this case Success()) {
-      action((this as Success<T, E>).value);
+      action((this as Success<T, E>)._value);
     }
     return this;
   }
@@ -148,7 +156,7 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// ```
   Result<T, E> onFailure(void Function(E error) action) {
     if (this case Failure()) {
-      action((this as Failure<T, E>).error);
+      action((this as Failure<T, E>)._error);
     }
     return this;
   }
@@ -167,7 +175,7 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(failure.getOrElse(() => 0)); // 0
   /// ```
   T getOrElse(T Function() defaultValue) => switch (this) {
-        Success() => (this as Success<T, E>).value,
+        Success() => (this as Success<T, E>)._value,
         Failure() => defaultValue(),
       };
 
@@ -185,7 +193,7 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// print(failure.getOrNull()); // null
   /// ```
   T? getOrNull() => switch (this) {
-        Success() => (this as Success<T, E>).value,
+        Success() => (this as Success<T, E>)._value,
         Failure() => null,
       };
 
@@ -199,11 +207,11 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   /// ```dart
   /// final failure = Result<int, String>.failure('network error');
   /// final recovered = failure.recover((error) => -1);
-  /// print(recovered.value); // -1
+  /// print(recovered.getOrNull()); // -1
   /// ```
   Result<T, E> recover(T Function(E error) recovery) => switch (this) {
         Success() => this,
-        Failure() => Result.success(recovery((this as Failure<T, E>).error)),
+        Failure() => Result.success(recovery((this as Failure<T, E>)._error)),
       };
 
   /// Recovers from a failure by providing another [Result].
@@ -225,7 +233,7 @@ extension ResultExtensions<T, E extends Object> on Result<T, E> {
   Result<T, E> recoverWith(Result<T, E> Function(E error) recovery) =>
       switch (this) {
         Success() => this,
-        Failure() => recovery((this as Failure<T, E>).error),
+        Failure() => recovery((this as Failure<T, E>)._error),
       };
 }
 
@@ -244,15 +252,13 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   /// ```dart
   /// final futureResult = Future.value(Result<int, String>.success(42));
   /// final mapped = await futureResult.mapAsync((x) async => x.toString());
-  /// print(mapped.value); // '42'
+  /// print(mapped.getOrNull()); // '42'
   /// ```
   Future<Result<U, E>> mapAsync<U>(Future<U> Function(T value) mapper) async {
     final result = await this;
     return switch (result) {
-      Success() => Result.success(await mapper(result.getOrNull() as T)),
-      Failure() => Result.failure(result.when(
-          success: (_) => throw StateError('Expected failure'),
-          failure: (e) => e)),
+      Success() => Result.success(await mapper((result as Success<T, E>)._value)),
+      Failure() => result as Result<U, E>,
     };
   }
 
@@ -277,10 +283,8 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   ) async {
     final result = await this;
     return switch (result) {
-      Success() => await mapper(result.getOrNull() as T),
-      Failure() => Result.failure(result.when(
-          success: (_) => throw StateError('Expected failure'),
-          failure: (e) => e)),
+      Success() => await mapper((result as Success<T, E>)._value),
+      Failure() => result as Result<U, E>,
     };
   }
 
@@ -304,10 +308,8 @@ extension FutureResultExtensions<T, E extends Object> on Future<Result<T, E>> {
   }) async {
     final result = await this;
     return switch (result) {
-      Success() => await success(result.getOrNull() as T),
-      Failure() => await failure(result.when(
-          success: (_) => throw StateError('Expected failure'),
-          failure: (e) => e)),
+      Success() => await success((result as Success<T, E>)._value),
+      Failure() => await failure((result as Failure<T, E>)._error),
     };
   }
 }

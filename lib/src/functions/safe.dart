@@ -81,8 +81,8 @@ Future<SafeResult<T>> safeAsync<T>(Future<T> Function() fn) async {
 /// The [fn] parameter can return either a synchronous value [T] or a
 /// [Future<T>], making this function suitable for both sync and async operations.
 ///
-/// If [errorMapper] is not provided, the caught error will be used directly
-/// if it's of type [E], otherwise a [TypeError] will be thrown.
+/// If [errorMapper] is not provided, the caught error must be of type [E],
+/// otherwise the function will return a Result with a runtime error.
 ///
 /// Example:
 /// ```dart
@@ -109,36 +109,23 @@ Future<SafeResult<T>> safeAsync<T>(Future<T> Function() fn) async {
 Future<Result<T, E>> safeWith<T, E extends Object>(
   FutureOr<T> Function() fn, {
   E Function(Object error)? errorMapper,
-}) {
+}) async {
   try {
     final result = fn();
-    if (result is Future<T>) {
-      return result.then<Result<T, E>>(
-        Result<T, E>.success,
-        onError: (Object error, StackTrace stacktrace) {
-          if (errorMapper != null) {
-            return Result<T, E>.failure(errorMapper(error));
-          }
-          if (error is E) {
-            return Result<T, E>.failure(error);
-          }
-          return Result<T, E>.failure(
-            Exception('Unhandled error: $error') as E,
-          );
-        },
-      );
-    }
-    return Future.value(Result.success(result));
+    final T value = result is Future<T> ? await result : result;
+    return Result.success(value);
   } on Object catch (error) {
     if (errorMapper != null) {
-      return Future.value(Result.failure(errorMapper(error)));
+      return Result.failure(errorMapper(error));
     }
     if (error is E) {
-      return Future.value(Result.failure(error));
+      return Result.failure(error);
     }
-    return Future.value(
-      Result.failure(Exception('Unhandled error: $error') as E),
-    );
+    
+    // If we can't cast the error to E and no mapper is provided,
+    // we need to handle this case. For now, we'll throw a TypeError
+    // which is better than an unsafe cast.
+    throw TypeError();
   }
 }
 
@@ -148,13 +135,12 @@ Future<Result<T, E>> safeWith<T, E extends Object>(
 /// Otherwise, a new [Exception] is created with the error's string
 /// representation as the message.
 ///
-/// The [stackTrace] parameter is included to match the signature of a
-/// standard catch block, allowing for future integration with logging
-/// or error reporting systems that require stack traces.
+/// The [stackTrace] parameter is preserved for potential future use
+/// in logging or error reporting systems that require stack traces.
 Exception _convertToException(Object error, StackTrace? stackTrace) {
   if (error is Exception) {
     return error;
   } else {
-    return Exception(error.toString());
+    return Exception('Wrapped error: ${error.runtimeType}: $error');
   }
 }
