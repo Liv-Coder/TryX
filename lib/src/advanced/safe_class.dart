@@ -199,45 +199,63 @@ class Safe {
 
     while (true) {
       try {
-        // Execute the function with optional timeout
-        final T result;
-        if (timeout != null) {
-          result = await Future.sync(fn).timeout(timeout!);
-        } else {
-          result = await Future.sync(fn);
-        }
-
+        final result = await _executeWithTimeout(fn);
         return Result.success(result);
       } on Object catch (error) {
-        // Log the error
-        logger?.call(error, attempt);
+        _logError(error, attempt);
 
-        // Check if we should retry
-        if (retryPolicy.shouldRetry(attempt)) {
-          final delay = retryPolicy.getDelay(attempt);
-
-          // Call retry callback
-          onRetry?.call(error, attempt, delay);
-
-          // Wait before retrying
-          if (delay > Duration.zero) {
-            await Future<void>.delayed(delay);
-          }
-
+        if (_shouldRetry(attempt)) {
+          await _handleRetry(error, attempt);
           attempt++;
           continue;
         }
 
-        // No more retries, return failure
-        final mappedError = errorMapper?.call(error) ?? error;
-
-        if (mappedError is E) {
-          return Result.failure(mappedError);
-        } else {
-          // If the mapped error can't be cast to E, this is a programming error
-          throw TypeError();
-        }
+        return _createFailureResult<T, E>(error);
       }
+    }
+  }
+
+  /// Executes the function with optional timeout.
+  Future<T> _executeWithTimeout<T>(FutureOr<T> Function() fn) async {
+    if (timeout != null) {
+      return await Future.sync(fn).timeout(timeout!);
+    } else {
+      return await Future.sync(fn);
+    }
+  }
+
+  /// Logs the error if a logger is configured.
+  void _logError(Object error, int attempt) {
+    logger?.call(error, attempt);
+  }
+
+  /// Checks if we should retry based on the retry policy.
+  bool _shouldRetry(int attempt) {
+    return retryPolicy.shouldRetry(attempt);
+  }
+
+  /// Handles the retry logic including delay and callback.
+  Future<void> _handleRetry(Object error, int attempt) async {
+    final delay = retryPolicy.getDelay(attempt);
+    
+    // Call retry callback
+    onRetry?.call(error, attempt, delay);
+
+    // Wait before retrying
+    if (delay > Duration.zero) {
+      await Future<void>.delayed(delay);
+    }
+  }
+
+  /// Creates a failure result with proper error mapping and type checking.
+  Result<T, E> _createFailureResult<T, E extends Object>(Object error) {
+    final mappedError = errorMapper?.call(error) ?? error;
+
+    if (mappedError is E) {
+      return Result.failure(mappedError);
+    } else {
+      // If the mapped error can't be cast to E, this is a programming error
+      throw TypeError();
     }
   }
 

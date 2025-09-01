@@ -255,7 +255,32 @@ void main() {
           success: (_) => throw StateError('Expected failure'),
           failure: (e) => e,
         ),
-        isA<TypeError>(),
+        isA<Exception>(),
+      );
+    });
+
+    test('should throw TypeError when error type mismatch and no mapper', () async {
+      expect(
+        () async => await safeWith<int, ArgumentError>(
+          () => throw Exception('test'),
+        ),
+        throwsA(isA<TypeError>()),
+      );
+    });
+
+    test('should handle custom error mapping', () async {
+      final result = await safeWith<int, String>(
+        () => throw Exception('original'),
+        errorMapper: (error) => 'Mapped: ${error.toString()}',
+      );
+
+      expect(result.isFailure, isTrue);
+      expect(
+        result.when(
+          success: (_) => throw StateError('Expected failure'),
+          failure: (e) => e,
+        ),
+        equals('Mapped: Exception: original'),
       );
     });
   });
